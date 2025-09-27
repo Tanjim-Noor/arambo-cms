@@ -5,6 +5,11 @@ export type InventoryStatus = "Looking for Rent" | "Found Tenant" | "Owner Unrea
 export type TenantType = "Family" | "Bachelor" | "Women"
 export type PropertyCategory = "Residential" | "Commercial"
 export type FurnishingStatus = "Non-Furnished" | "Semi-Furnished" | "Furnished"
+export interface PropertyValueHistory {
+  year: number
+  value: number
+}
+
 export type Area =
   | "Aftabnagar"
   | "Banani"
@@ -119,6 +124,7 @@ export interface Property {
 
   apartmentType?: string
   isVerified?: boolean
+  propertyValueHistory?: PropertyValueHistory[]
 }
 
 export interface Trip {

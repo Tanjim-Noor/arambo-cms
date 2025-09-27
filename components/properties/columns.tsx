@@ -171,6 +171,29 @@ export const createColumns = ({
     },
   },
   {
+    accessorKey: "propertyValueHistory",
+    header: "Value History",
+    cell: ({ row }) => {
+      const property = row.original
+      const history = property.propertyValueHistory
+      
+      return (
+        <div className="min-w-[100px]">
+          {history && history.length > 0 ? (
+            history.map((item, index) => (
+              <div key={index} className="text-sm">
+                <span className="font-medium">৳{item.value}</span>
+                <span className="text-muted-foreground ml-1">({item.year})</span>
+              </div>
+            ))
+          ) : (
+            <span className="text-muted-foreground">-</span>
+          )}
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: "inventoryStatus",
     header: "Status",
     cell: ({ row }) => {
