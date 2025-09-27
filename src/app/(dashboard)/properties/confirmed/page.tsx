@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import type { Property } from "@/types"
 import { api } from "@/lib/api"
 import { DataTable } from "@/components/properties/data-table"
@@ -19,7 +19,7 @@ export default function ConfirmedPropertiesPage() {
   const [detailsOpen, setDetailsOpen] = useState(false)
   const { toast } = useToast()
 
-  const fetchProperties = async () => {
+  const fetchProperties = useCallback(async () => {
     try {
       setLoading(true)
       const response = await api.properties.getAll({ isConfirmed: true, limit: 1000 })
@@ -31,49 +31,15 @@ export default function ConfirmedPropertiesPage() {
         description: "Failed to fetch properties. Please try again.",
         variant: "destructive",
       })
-      // Mock data for development
-      setProperties([
-        {
-          id: "2",
-          name: "Jane Smith",
-          email: "jane@example.com",
-          phone: "01987654321",
-          propertyName: "Modern House in Banani",
-          listingType: "For Sale",
-          propertyType: "House",
-          size: 2000,
-          location: "Banani, Dhaka",
-          bedrooms: 4,
-          bathroom: 3,
-          category: "Semi-Furnished",
-          isConfirmed: true,
-          isVerified: true,
-          rent: 0,
-          area: "Banani",
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-          updatedAt: new Date().toISOString(),
-          firstOwner: false,
-          lift: true,
-          paperworkUpdated: true,
-          onLoan: false,
-          cctv: true,
-          communityHall: true,
-          gym: false,
-          masjid: true,
-          parking: true,
-          petsAllowed: true,
-          swimmingPool: true,
-          trainedGuard: true,
-        },
-      ] as Property[])
+      
     } finally {
       setLoading(false)
     }
-  }
+  }, [toast])
 
   useEffect(() => {
     fetchProperties()
-  }, [])
+  }, [fetchProperties])
 
   const handleView = (property: Property) => {
     setSelectedProperty(property)
@@ -85,15 +51,16 @@ export default function ConfirmedPropertiesPage() {
   }
 
   const handleDelete = async (property: Property) => {
-    if (confirm("Are you sure you want to delete this property?")) {
+    if (confirm(`Are you sure you want to delete "${property.propertyName}"?`)) {
       try {
         // await api.properties.delete(property.id)
         toast({
           title: "Success",
-          description: "Property deleted successfully.",
+          description: `Property "${property.propertyName}" deleted successfully.`,
         })
-        fetchProperties()
+        await fetchProperties()
       } catch (error) {
+        console.error('Error deleting property:', error)
         toast({
           title: "Error",
           description: "Failed to delete property.",

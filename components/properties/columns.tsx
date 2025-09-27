@@ -255,11 +255,15 @@ export const createColumns = ({
     cell: ({ row }) => {
       const property = row.original
       const facilities = []
-      if (property.parking) facilities.push("Parking")
-      if (property.lift) facilities.push("Lift")
-      if (property.gym) facilities.push("Gym")
-      if (property.swimmingPool) facilities.push("Pool")
       if (property.cctv) facilities.push("CCTV")
+      if (property.communityHall) facilities.push("Community Hall")
+      if (property.gym) facilities.push("Gym")
+      if (property.masjid) facilities.push("Masjid")
+      if (property.parking) facilities.push("Parking")
+      if (property.petsAllowed) facilities.push("Pets Allowed")
+      if (property.swimmingPool) facilities.push("Pool")
+      if (property.trainedGuard) facilities.push("Security")
+      if (property.lift) facilities.push("Lift")
 
       return facilities.length > 0 ? (
         <div className="flex flex-wrap gap-1">
@@ -320,6 +324,113 @@ export const createColumns = ({
             </Badge>
           )}
         </div>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "listingId",
+    header: "Listing ID",
+    cell: ({ row }) => {
+      const listingId = row.getValue("listingId") as string
+      return listingId ? (
+        <span className="text-xs font-mono bg-muted px-1 py-0.5 rounded">{listingId}</span>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "houseId",
+    header: "House ID",
+    cell: ({ row }) => {
+      const houseId = row.getValue("houseId") as string
+      return houseId ? (
+        <span className="text-xs font-mono bg-muted px-1 py-0.5 rounded">{houseId}</span>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "apartmentType",
+    header: "Apt Type",
+    cell: ({ row }) => {
+      const type = row.getValue("apartmentType") as string
+      return type ? (
+        <span className="text-sm">{type}</span>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "furnishingStatus",
+    header: "Furnishing",
+    cell: ({ row }) => {
+      const status = row.getValue("furnishingStatus") as string
+      const colors = {
+        "Furnished": "bg-green-500/10 text-green-500 border-green-500/20",
+        "Semi-Furnished": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
+        "Non-Furnished": "bg-gray-500/10 text-gray-500 border-gray-500/20",
+      }
+      return status ? (
+        <Badge variant="outline" className={colors[status as keyof typeof colors] || "bg-muted text-muted-foreground"}>
+          {status}
+        </Badge>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "availableFrom",
+    header: "Available From",
+    cell: ({ row }) => {
+      const date = row.getValue("availableFrom") as string
+      return date ? (
+        <span className="text-sm">{new Date(date).toLocaleDateString()}</span>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "streetAddress",
+    header: "Street Address",
+    cell: ({ row }) => {
+      const address = row.getValue("streetAddress") as string
+      return address ? (
+        <div className="max-w-[150px]">
+          <span className="text-sm truncate block" title={address}>{address}</span>
+        </div>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "landmark",
+    header: "Landmark",
+    cell: ({ row }) => {
+      const landmark = row.getValue("landmark") as string
+      return landmark ? (
+        <div className="max-w-[120px]">
+          <span className="text-sm truncate block" title={landmark}>{landmark}</span>
+        </div>
+      ) : (
+        <span className="text-muted-foreground">-</span>
+      )
+    },
+  },
+  {
+    accessorKey: "baranda",
+    header: "Baranda",
+    cell: ({ row }) => {
+      const baranda = row.getValue("baranda") as number
+      return baranda !== undefined ? (
+        <span className="text-sm">{baranda}</span>
       ) : (
         <span className="text-muted-foreground">-</span>
       )

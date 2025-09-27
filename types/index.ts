@@ -1,6 +1,10 @@
 export type ListingType = "For Rent" | "For Sale" | "Both"
-export type PropertyType = "Apartment" | "House" | "Villa" | "Commercial" | "Studio"
+export type PropertyType = "Apartment" | "House" | "Villa"
 export type Category = "Furnished" | "Semi-Furnished" | "Non-Furnished"
+export type InventoryStatus = "Looking for Rent" | "Found Tenant" | "Owner Unreachable"
+export type TenantType = "Family" | "Bachelor" | "Women"
+export type PropertyCategory = "Residential" | "Commercial"
+export type FurnishingStatus = "Non-Furnished" | "Semi-Furnished" | "Furnished"
 export type Area =
   | "Aftabnagar"
   | "Banani"
@@ -83,10 +87,10 @@ export interface Property {
   landmark?: string
   area?: Area
   listingId?: string
-  inventoryStatus?: string
-  tenantType?: string
-  propertyCategory?: string
-  furnishingStatus?: string
+  inventoryStatus?: InventoryStatus
+  tenantType?: TenantType
+  propertyCategory?: PropertyCategory
+  furnishingStatus?: FurnishingStatus
   availableFrom?: Date
   floor?: number
   totalFloor?: number
@@ -112,6 +116,7 @@ export interface Property {
   petsAllowed?: boolean
   swimmingPool?: boolean
   trainedGuard?: boolean
+
   apartmentType?: string
   isVerified?: boolean
 }

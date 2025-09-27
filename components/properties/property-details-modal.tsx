@@ -23,6 +23,9 @@ import {
   CheckCircle,
   FileText,
   Hash,
+  Users,
+  Heart,
+  Building2,
 } from "lucide-react"
 
 interface PropertyDetailsModalProps {
@@ -36,14 +39,14 @@ export function PropertyDetailsModal({ property, open, onOpenChange }: PropertyD
 
   const facilities = [
     { key: "cctv", label: "CCTV", value: property.cctv, icon: Camera },
+    { key: "communityHall", label: "Community Hall", value: property.communityHall, icon: Users },
     { key: "gym", label: "Gym", value: property.gym, icon: Dumbbell },
+    { key: "masjid", label: "Masjid", value: property.masjid, icon: Building2 },
     { key: "parking", label: "Parking", value: property.parking, icon: Car },
-    { key: "lift", label: "Lift", value: property.lift, icon: Building },
+    { key: "petsAllowed", label: "Pets Allowed", value: property.petsAllowed, icon: Heart },
     { key: "swimmingPool", label: "Swimming Pool", value: property.swimmingPool, icon: Waves },
     { key: "trainedGuard", label: "Security Guard", value: property.trainedGuard, icon: Shield },
-    { key: "communityHall", label: "Community Hall", value: property.communityHall, icon: Home },
-    { key: "masjid", label: "Masjid", value: property.masjid, icon: Home },
-    { key: "petsAllowed", label: "Pets Allowed", value: property.petsAllowed, icon: Home },
+    { key: "lift", label: "Lift", value: property.lift, icon: Building },
   ].filter((facility) => facility.value)
 
   const qualityScores = [
@@ -83,8 +86,11 @@ export function PropertyDetailsModal({ property, open, onOpenChange }: PropertyD
               <Badge variant="outline">{property.category}</Badge>
               {property.propertyType && <Badge variant="outline">{property.propertyType}</Badge>}
               {property.propertyCategory && <Badge variant="outline">{property.propertyCategory}</Badge>}
-              {property.furnishingStatus && <Badge variant="outline">{property.furnishingStatus}</Badge>}
+              {property.furnishingStatus && property.furnishingStatus !== property.category && (
+                <Badge variant="outline">{property.furnishingStatus}</Badge>
+              )}
               {property.tenantType && <Badge variant="secondary">{property.tenantType}</Badge>}
+              {property.apartmentType && <Badge variant="outline">{property.apartmentType}</Badge>}
               {property.inventoryStatus && (
                 <Badge
                   variant="outline"
@@ -162,7 +168,7 @@ export function PropertyDetailsModal({ property, open, onOpenChange }: PropertyD
                     <div className="font-medium">{property.bathroom}</div>
                   </div>
                 </div>
-                {property.baranda !== undefined && (
+                {property.baranda !== undefined && property.baranda > 0 && (
                   <div className="flex items-center gap-2">
                     <Home className="h-4 w-4 text-muted-foreground" />
                     <div>
@@ -207,6 +213,61 @@ export function PropertyDetailsModal({ property, open, onOpenChange }: PropertyD
                 {property.listingId && (
                   <div>
                     <span className="text-muted-foreground">Listing ID:</span> {property.listingId}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Separator />
+
+            {/* Property Classification */}
+            <div>
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Building className="h-4 w-4" />
+                Property Classification
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Listing Type:</span> {property.listingType || "Not specified"}
+                </div>
+                {property.propertyType && (
+                  <div>
+                    <span className="text-muted-foreground">Property Type:</span> {property.propertyType}
+                  </div>
+                )}
+                {property.propertyCategory && (
+                  <div>
+                    <span className="text-muted-foreground">Property Category:</span> {property.propertyCategory}
+                  </div>
+                )}
+                {property.tenantType && (
+                  <div>
+                    <span className="text-muted-foreground">Preferred Tenant:</span> {property.tenantType}
+                  </div>
+                )}
+                <div>
+                  <span className="text-muted-foreground">Furnishing:</span> {property.category}
+                </div>
+                {property.furnishingStatus && property.furnishingStatus !== property.category && (
+                  <div>
+                    <span className="text-muted-foreground">Furnishing Status:</span> {property.furnishingStatus}
+                  </div>
+                )}
+                {property.inventoryStatus && (
+                  <div>
+                    <span className="text-muted-foreground">Inventory Status:</span>{" "}
+                    <Badge
+                      variant="outline"
+                      className={
+                        property.inventoryStatus === "Found Tenant"
+                          ? "bg-green-500/10 text-green-500 border-green-500/20"
+                          : property.inventoryStatus === "Owner Unreachable"
+                            ? "bg-red-500/10 text-red-500 border-red-500/20"
+                            : "bg-blue-500/10 text-blue-500 border-blue-500/20"
+                      }
+                    >
+                      {property.inventoryStatus}
+                    </Badge>
                   </div>
                 )}
               </div>
