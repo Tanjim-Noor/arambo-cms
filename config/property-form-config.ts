@@ -78,7 +78,7 @@ export const defaultPropertyFormConfig: PropertyFormConfig = {
   
   // Images (Group 11)
   coverImage: { required: false, visible: true, order: 47, group: "images" },
-  otherImages: { required: false, visible: false, order: 48, group: "images" }, // Hidden for now
+  otherImages: { required: false, visible: true, order: 48, group: "images" },
   
   // Notes (Group 12)
   notes: { required: false, visible: true, order: 49, group: "notes" },

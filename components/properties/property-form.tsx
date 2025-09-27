@@ -18,6 +18,7 @@ import { propertyFormSchema, type PropertyFormData } from "@/lib/validations/pro
 import { defaultPropertyFormConfig, formGroupLabels, formGroupOrder, type PropertyFormConfig } from "@/config/property-form-config";
 import type { Property } from "@/types";
 import { PropertyValueHistoryInput } from "@/components/ui/property-value-history-input";
+import { ImageListInput } from "@/components/ui/image-list-input";
 
 interface PropertyFormProps {
   initialData?: Property | null;
@@ -100,6 +101,16 @@ export function PropertyForm({
       count: data.propertyValueHistory?.length || 0,
       data: data.propertyValueHistory || [],
       isEmpty: !data.propertyValueHistory || data.propertyValueHistory.length === 0
+    });
+    
+    // Specifically log otherImages
+    console.log("🖼️ Other Images:", {
+      count: data.otherImages?.length || 0,
+      data: data.otherImages || [],
+      isEmpty: !data.otherImages || data.otherImages.length === 0,
+      type: typeof data.otherImages,
+      isArray: Array.isArray(data.otherImages),
+      allStrings: Array.isArray(data.otherImages) ? data.otherImages.every(item => typeof item === 'string') : 'N/A'
     });
     
     // Log validation status
@@ -569,6 +580,29 @@ export function PropertyForm({
           />
         );
 
+      // Other Images (multiple URLs)
+      case "otherImages":
+        return (
+          <div key={fieldName} className="md:col-span-2 lg:col-span-3">
+            <FormField
+              name={fieldName}
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {getFieldLabel(fieldName)} {isRequired && <span className="text-red-500">*</span>}
+                  </FormLabel>
+                  <ImageListInput
+                    value={field.value || []}
+                    onChange={field.onChange}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
       // Property Value History
       case "propertyValueHistory":
         return (
@@ -680,6 +714,7 @@ const getFieldLabel = (fieldName: string): string => {
     apartmentType: "Apartment Type",
     isVerified: "Verified",
     coverImage: "Cover Image URL",
+    otherImages: "Other Images URLs",
     propertyValueHistory: "Property Value History",
   };
   return labels[fieldName] || fieldName;
@@ -711,6 +746,7 @@ const getFieldPlaceholder = (fieldName: string): string => {
     bathroomConditionsScore: "Rate 1-10",
     apartmentType: "e.g., Studio, 2BHK",
     coverImage: "Enter image URL",
+    otherImages: "Enter one image URL per line",
   };
   return placeholders[fieldName] || "";
 };
