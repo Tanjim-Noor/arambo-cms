@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { CreatePropertyForm } from "@/components/properties/create-property-form"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
+import { PropertyForm } from "@/components/properties/property-form"
 import type { Property } from "@/types"
+import type { PropertyFormData } from "@/lib/validations/property-form"
 import { api } from "@/lib/api"
 
 export default function EditPropertyPage() {
@@ -17,6 +18,7 @@ export default function EditPropertyPage() {
   const { toast } = useToast()
   const [property, setProperty] = useState<Property | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const propertyId = params.id as string
 
@@ -44,12 +46,25 @@ export default function EditPropertyPage() {
     }
   }, [propertyId, router, toast])
 
-  const handleSuccess = (updatedProperty: Property) => {
-    toast({
-      title: "Success",
-      description: "Property updated successfully.",
-    })
-    router.push("/properties/confirmed")
+  const handleSubmit = async (data: PropertyFormData) => {
+    try {
+      setIsSubmitting(true)
+      await api.properties.update(propertyId, data)
+      toast({
+        title: "Success",
+        description: "Property updated successfully.",
+      })
+      router.push("/properties/confirmed")
+    } catch (error) {
+      console.error("Error updating property:", error)
+      toast({
+        title: "Error",
+        description: "Failed to update property. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   if (loading) {
@@ -62,7 +77,7 @@ export default function EditPropertyPage() {
             <Skeleton className="h-4 w-[300px] mt-2" />
           </div>
         </div>
-        <div className="max-w-4xl space-y-4">
+        <div className="max-w-7xl space-y-4">
           <Skeleton className="h-[600px] w-full" />
         </div>
       </div>
@@ -81,7 +96,7 @@ export default function EditPropertyPage() {
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-foreground">Property Not Found</h1>
-            <p className="text-muted-foreground">The property you're looking for doesn't exist.</p>
+            <p className="text-muted-foreground">The property you&apos;re looking for doesn&apos;t exist.</p>
           </div>
         </div>
       </div>
@@ -103,8 +118,13 @@ export default function EditPropertyPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl">
-        <CreatePropertyForm property={property} isEdit onSuccess={handleSuccess} />
+      <div className="max-w-7xl">
+        <PropertyForm
+          mode="edit"
+          initialData={property}
+          onSubmit={handleSubmit}
+          isLoading={isSubmitting}
+        />
       </div>
     </div>
   )

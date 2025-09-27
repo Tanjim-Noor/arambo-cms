@@ -1,22 +1,38 @@
 "use client"
 import { useRouter } from "next/navigation"
-import { CreatePropertyForm } from "@/components/properties/create-property-form"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
-import type { Property } from "@/types"
+import { PropertyForm } from "@/components/properties/property-form"
+import type { PropertyFormData } from "@/lib/validations/property-form"
+import { api } from "@/lib/api"
+import { useState } from "react"
 
 export default function NewPropertyPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSuccess = (property: Property) => {
-    toast({
-      title: "Success",
-      description: "Property created successfully.",
-    })
-    router.push("/properties/confirmed")
+  const handleSubmit = async (data: PropertyFormData) => {
+    try {
+      setIsLoading(true)
+      await api.properties.create(data)
+      toast({
+        title: "Success",
+        description: "Property created successfully.",
+      })
+      router.push("/properties/confirmed")
+    } catch (error) {
+      console.error("Error creating property:", error)
+      toast({
+        title: "Error",
+        description: "Failed to create property. Please try again.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
@@ -34,8 +50,12 @@ export default function NewPropertyPage() {
         </div>
       </div>
 
-      <div className="max-w-4xl">
-        <CreatePropertyForm onSuccess={handleSuccess} />
+      <div className="max-w-7xl">
+        <PropertyForm
+          mode="create"
+          onSubmit={handleSubmit}
+          isLoading={isLoading}
+        />
       </div>
     </div>
   )
