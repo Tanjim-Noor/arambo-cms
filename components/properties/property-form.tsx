@@ -18,7 +18,7 @@ import { propertyFormSchema, type PropertyFormData } from "@/lib/validations/pro
 import { defaultPropertyFormConfig, formGroupLabels, formGroupOrder, type PropertyFormConfig } from "@/config/property-form-config";
 import type { Property } from "@/types";
 import { PropertyValueHistoryInput } from "@/components/ui/property-value-history-input";
-import { ImageListInput } from "@/components/ui/image-list-input";
+import { ImageUploadModal } from "@/components/ui/image-upload-modal";
 
 interface PropertyFormProps {
   initialData?: Property | null;
@@ -60,7 +60,7 @@ export function PropertyForm({
       tenantType: initialData?.tenantType || undefined,
       propertyCategory: initialData?.propertyCategory || undefined,
       furnishingStatus: initialData?.furnishingStatus || undefined,
-      availableFrom: initialData?.availableFrom || undefined,
+      availableFrom: initialData?.availableFrom ? new Date(initialData.availableFrom) : undefined,
       floor: initialData?.floor || undefined,
       totalFloor: initialData?.totalFloor || undefined,
       yearOfConstruction: initialData?.yearOfConstruction || undefined,
@@ -168,7 +168,6 @@ export function PropertyForm({
       case "landmark":
       case "listingId":
       case "apartmentType":
-      case "coverImage":
         return (
           <FormField
             key={fieldName}
@@ -182,7 +181,7 @@ export function PropertyForm({
                 <FormControl>
                   <Input
                     placeholder={getFieldPlaceholder(fieldName)}
-                    type={getFieldInputType(fieldName)}
+                    type={fieldName === "email" ? "email" : fieldName === "phone" ? "tel" : "text"}
                     {...field}
                     value={String(field.value || "")}
                   />
@@ -191,6 +190,33 @@ export function PropertyForm({
               </FormItem>
             )}
           />
+        );
+
+      // Cover Image Upload
+      case "coverImage":
+        return (
+          <div key={fieldName} className="md:col-span-2 lg:col-span-3">
+            <FormField
+              name={fieldName}
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {getFieldLabel(fieldName)} {isRequired && <span className="text-red-500">*</span>}
+                  </FormLabel>
+                  <ImageUploadModal
+                    value={field.value ? [field.value] : []}
+                    onChange={(urls: string[]) => field.onChange(urls[0] || "")}
+                    title="Upload Cover Image"
+                    description="Choose a high-quality image to represent your property"
+                    single={true}
+                    maxFiles={1}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         );
 
       // Number inputs
@@ -592,9 +618,13 @@ export function PropertyForm({
                   <FormLabel>
                     {getFieldLabel(fieldName)} {isRequired && <span className="text-red-500">*</span>}
                   </FormLabel>
-                  <ImageListInput
+                  <ImageUploadModal
                     value={field.value || []}
                     onChange={field.onChange}
+                    title="Upload Property Images"
+                    description="Add multiple images to showcase your property features and rooms"
+                    single={false}
+                    maxFiles={10}
                   />
                   <FormMessage />
                 </FormItem>
@@ -749,12 +779,6 @@ const getFieldPlaceholder = (fieldName: string): string => {
     otherImages: "Enter one image URL per line",
   };
   return placeholders[fieldName] || "";
-};
-
-const getFieldInputType = (fieldName: string): string => {
-  if (fieldName === "email") return "email";
-  if (fieldName === "phone") return "tel";
-  return "text";
 };
 
 const areaOptions = [
