@@ -1,31 +1,42 @@
-# Image Upload Debug Guide
+# Image Upload Debug Guide - UPDATED
 
-## Changes Made to Fix Upload Issues
+## Issues Fixed ✅
 
-### 1. Updated ImageUploadModal Component
+### 1. Missing Upload Preset
+- **Problem**: `ml_default` upload preset didn't exist in Cloudinary account
+- **Solution**: Created `arambo_unsigned` upload preset programmatically
+- **API**: `/api/create-upload-preset` - Creates the required preset
+- **Verification**: `/api/test-cloudinary` - Tests configuration and lists presets
+
+### 2. Updated ImageUploadModal Component
 - **Location**: `components/ui/image-upload-modal.tsx`
-- **Change**: Switched from unsigned uploads (`uploadPreset="ml_default"`) to signed uploads
-- **Reason**: The `ml_default` preset may not be properly configured for unsigned uploads
-
-### 2. Updated API Route
-- **Location**: `src/app/api/sign-cloudinary-params/route.ts`
 - **Changes**:
-  - Added official Cloudinary SDK: `npm install cloudinary`
-  - Replaced custom signature generation with `cloudinary.utils.api_sign_request`
-  - Added proper Cloudinary configuration
+  - Added comprehensive debugging with console logs
+  - Added error handling with `onError`, `onOpen`, `onClose` callbacks
+  - Added development-only debug info display in the modal
+  - Switched to `arambo_unsigned` upload preset
 
-### 3. Environment Variables
-- **Location**: `.env.local`
-- **Added**: `NEXT_PUBLIC_CLOUDINARY_API_KEY=961969121166623`
-- **Required for**: Client-side Cloudinary widget functionality
+### 3. Environment Variables Verified
+```bash
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dexmznutn ✅
+NEXT_PUBLIC_CLOUDINARY_API_KEY=961969121166623 ✅
+CLOUDINARY_API_SECRET=NEfy93B1hMf1sGkVLHMv0EGvx3Y ✅
+```
 
-## Testing the Upload
+## Current Configuration:
 
-### Current Configuration:
+### Upload Preset: `arambo_unsigned`
+- **Type**: Unsigned (no server-side signature required)
+- **Allowed Formats**: JPG, JPEG, PNG, WebP, GIF
+- **Max File Size**: 10MB
+- **Folder**: `property-images`
+- **Auto Format**: Yes
+- **Auto Quality**: Yes
+
+### Upload Widget Configuration:
 ```javascript
-// Image Upload Modal now uses:
 <CldUploadWidget
-  signatureEndpoint="/api/sign-cloudinary-params"
+  uploadPreset="arambo_unsigned"
   options={{
     multiple: !single,
     maxFiles: single ? 1 : maxFiles - (value?.length || 0),
@@ -33,42 +44,65 @@
     resourceType: 'image',
     clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
     maxFileSize: 10000000, // 10MB
+    showPoweredBy: false,
+    folder: 'property-images',
   }}
   onSuccess={handleUploadSuccess}
->
+  onError={handleUploadError}
+  onOpen={handleWidgetOpen}
+  onClose={handleWidgetClose}
+/>
 ```
 
-### What Should Work Now:
-1. **Drag & Drop**: Files can be dragged into the upload area
-2. **Browse Button**: Click to select files from computer
-3. **Multiple Sources**: Local files, camera, and URL uploads
-4. **File Validation**: Only image files up to 10MB
-5. **Secure Uploads**: Server-side signature validation
+## What Should Work Now:
+1. ✅ **Upload Preset Exists**: `arambo_unsigned` is properly configured
+2. ✅ **Drag & Drop**: Should work with the widget
+3. ✅ **Browse Button**: Should open file picker properly
+4. ✅ **Multiple Sources**: Local files, camera, and URL uploads
+5. ✅ **File Validation**: Only image files up to 10MB
+6. ✅ **Error Handling**: All upload events are logged
+7. ✅ **Debug Info**: Development mode shows configuration details
 
-### Troubleshooting:
+## Debug Information Available:
 
-If uploads still don't work, check:
+### Console Logs:
+- 🔧 Environment variables and configuration
+- 🔓 Widget opening events
+- 🔒 Widget closing events  
+- ✅ Upload success with full result details
+- ❌ Upload errors with details
+- 📋 Queue completion events
 
-1. **Network Tab in Browser DevTools**:
-   - Look for calls to `/api/sign-cloudinary-params`
-   - Check if there are any 500 errors
+### In-Modal Debug (Development Only):
+- Cloud name verification
+- API key presence check
+- Upload preset name
+- Current widget state
 
-2. **Console Errors**:
-   - Open browser console
-   - Look for Cloudinary widget errors
+## Testing Steps:
+1. **Open Property Form**: Go to `/properties/new`
+2. **Click Upload Button**: For cover image or other images
+3. **Check Console**: Look for debug information in browser dev tools
+4. **Check Modal**: In development, debug info should be visible
+5. **Test Upload**: Try drag & drop or browse functionality
 
-3. **Environment Variables**:
-   ```bash
-   NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=dexmznutn
-   NEXT_PUBLIC_CLOUDINARY_API_KEY=961969121166623
-   CLOUDINARY_API_SECRET=NEfy93B1hMf1sGkVLHMv0EGvx3Y
-   ```
+## Troubleshooting:
 
-4. **API Route Response**:
-   - The signing endpoint should return `{"signature": "..."}`
-   - Check server logs for any errors
+### If Upload Still Doesn't Work:
+1. **Check Browser Console**: Look for any JavaScript errors
+2. **Check Network Tab**: Look for failed API requests
+3. **Check Debug Info**: Verify all environment variables are present
+4. **Third-Party Cookies**: The Cloudinary widget warning about partitioned cookies is normal and shouldn't affect functionality
 
-### Next Steps:
-1. Test the upload functionality in the browser
-2. If drag & drop still doesn't work, check browser console for errors
-3. Verify the Cloudinary account has proper upload permissions
+### Browser Cookie Warning:
+The warning about "Partitioned cookie or storage access" is expected and doesn't break functionality. This is Chrome's new security feature for third-party contexts.
+
+### Force Refresh Upload Preset:
+If needed, you can recreate the upload preset by calling:
+```bash
+POST http://localhost:3000/api/create-upload-preset
+```
+
+## API Endpoints for Debugging:
+- `GET /api/test-cloudinary` - Test configuration and list presets
+- `POST /api/create-upload-preset` - Create/recreate the upload preset
