@@ -109,6 +109,18 @@ export const propertyFormSchema = z.object({
   
   // Notes - Optional
   notes: z.string().max(1000, "Notes must be less than 1000 characters").optional(),
+  
+  // Property Value History - Optional
+  propertyValueHistory: z.array(
+    z.object({
+      year: z.number().min(1900, 'Year must be valid').max(new Date().getFullYear() + 20, 'Year cannot be too far in future'),
+      value: z.number()
+    })
+  ).default([]).refine((history) => {
+    // Ensure years are unique
+    const years = history.map(h => h.year);
+    return years.length === new Set(years).size;
+  }, { message: 'Property value history cannot have duplicate years' }).optional(),
 });
 
 export type PropertyFormData = z.infer<typeof propertyFormSchema>;

@@ -47,16 +47,33 @@ export default function EditPropertyPage() {
   }, [propertyId, router, toast])
 
   const handleSubmit = async (data: PropertyFormData) => {
+    console.group("📝 Edit Property Page - Handle Submit");
+    console.log("🆔 Property ID:", propertyId);
+    console.log("📝 Form Data:", data);
+    console.log("📊 Property Value History Check:", {
+      hasField: 'propertyValueHistory' in data,
+      isArray: Array.isArray(data.propertyValueHistory),
+      count: data.propertyValueHistory?.length || 0,
+      data: data.propertyValueHistory
+    });
+    
+    // Compare with initial data
+    console.log("🔄 Initial Property Data:", property);
+    console.log("📊 Initial Value History:", property?.propertyValueHistory);
+    
     try {
       setIsSubmitting(true)
-      await api.properties.update(propertyId, data)
+      console.log("🚀 Calling API to update property...");
+      const result = await api.properties.update(propertyId, data)
+      console.log("✅ Property updated successfully:", result);
+      
       toast({
         title: "Success",
         description: "Property updated successfully.",
       })
       router.push("/properties/confirmed")
     } catch (error) {
-      console.error("Error updating property:", error)
+      console.error("❌ Error updating property:", error)
       toast({
         title: "Error",
         description: "Failed to update property. Please try again.",
@@ -64,6 +81,7 @@ export default function EditPropertyPage() {
       })
     } finally {
       setIsSubmitting(false)
+      console.groupEnd();
     }
   }
 

@@ -443,6 +443,42 @@ export function PropertyDetailsModal({ property, open, onOpenChange }: PropertyD
               </>
             )}
 
+            {/* Property Value History */}
+            {property.propertyValueHistory && property.propertyValueHistory.length > 0 && (
+              <>
+                <Separator />
+                <div>
+                  <h3 className="font-semibold mb-3 flex items-center gap-2">
+                    <DollarSign className="h-4 w-4" />
+                    Property Value History
+                  </h3>
+                  <div className="space-y-2">
+                    {property.propertyValueHistory
+                      .sort((a, b) => b.year - a.year)
+                      .map((entry) => (
+                        <div key={entry.year} className="flex justify-between items-center p-3 bg-muted/30 rounded-lg">
+                          <div className="font-medium">{entry.year}</div>
+                          <div className="text-right">
+                            <div className="font-mono">
+                              {new Intl.NumberFormat('en-BD', {
+                                style: 'currency',
+                                currency: 'BDT',
+                                minimumFractionDigits: 0,
+                              }).format(entry.value)}
+                            </div>
+                            <div className="text-sm text-muted-foreground">
+                              ৳{entry.value >= 10000000 ? `${(entry.value / 10000000).toFixed(1)}Cr` : 
+                                 entry.value >= 100000 ? `${(entry.value / 100000).toFixed(1)}L` : 
+                                 `${(entry.value / 1000).toFixed(0)}K`}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              </>
+            )}
+
             {/* System Information */}
             <Separator />
             <div>

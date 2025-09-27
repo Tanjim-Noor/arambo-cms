@@ -82,6 +82,9 @@ export const defaultPropertyFormConfig: PropertyFormConfig = {
   
   // Notes (Group 12)
   notes: { required: false, visible: true, order: 49, group: "notes" },
+  
+  // Property Value History (Group 13)
+  propertyValueHistory: { required: false, visible: true, order: 50, group: "valueHistory" },
 };
 
 export const formGroupLabels = {
@@ -96,7 +99,8 @@ export const formGroupLabels = {
   facilities: "Facilities & Features",
   status: "Property Status",
   images: "Images",
-  notes: "Additional Notes"
+  notes: "Additional Notes",
+  valueHistory: "Property Value History"
 };
 
 export const formGroupOrder = [
@@ -111,5 +115,6 @@ export const formGroupOrder = [
   "facilities",
   "status",
   "images",
-  "notes"
+  "notes",
+  "valueHistory"
 ];

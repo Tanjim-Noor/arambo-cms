@@ -25,22 +25,63 @@ export const api = {
       return response.json()
     },
     create: async (data: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) => {
+      console.group("🚀 API: Creating Property");
+      console.log("📤 Request Data:", data);
+      console.log("📊 Property Value History in API:", {
+        hasHistory: !!data.propertyValueHistory,
+        count: data.propertyValueHistory?.length || 0,
+        data: data.propertyValueHistory || []
+      });
+      
       const response = await fetch(`${API_BASE_URL}/properties`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
-      if (!response.ok) throw new Error("Failed to create property")
-      return response.json()
+      
+      const responseData = await response.json();
+      console.log("📥 Response Status:", response.status);
+      console.log("📥 Response Data:", responseData);
+      
+      if (!response.ok) {
+        console.error("❌ API Error:", responseData);
+        console.groupEnd();
+        throw new Error("Failed to create property")
+      }
+      
+      console.log("✅ Property created successfully");
+      console.groupEnd();
+      return responseData;
     },
     update: async (id: string, data: Partial<Property>) => {
+      console.group("🔄 API: Updating Property");
+      console.log("🆔 Property ID:", id);
+      console.log("📤 Request Data:", data);
+      console.log("📊 Property Value History in API:", {
+        hasHistory: !!data.propertyValueHistory,
+        count: data.propertyValueHistory?.length || 0,
+        data: data.propertyValueHistory || []
+      });
+      
       const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
-      if (!response.ok) throw new Error("Failed to update property")
-      return response.json()
+      
+      const responseData = await response.json();
+      console.log("📥 Response Status:", response.status);
+      console.log("📥 Response Data:", responseData);
+      
+      if (!response.ok) {
+        console.error("❌ API Error:", responseData);
+        console.groupEnd();
+        throw new Error("Failed to update property")
+      }
+      
+      console.log("✅ Property updated successfully");
+      console.groupEnd();
+      return responseData;
     },
     getStats: async (): Promise<PropertyStats> => {
       const response = await fetch(`${API_BASE_URL}/properties/stats`)

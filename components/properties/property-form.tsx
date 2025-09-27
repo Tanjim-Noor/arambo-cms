@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { propertyFormSchema, type PropertyFormData } from "@/lib/validations/property-form";
 import { defaultPropertyFormConfig, formGroupLabels, formGroupOrder, type PropertyFormConfig } from "@/config/property-form-config";
 import type { Property } from "@/types";
+import { PropertyValueHistoryInput } from "@/components/ui/property-value-history-input";
 
 interface PropertyFormProps {
   initialData?: Property | null;
@@ -85,11 +86,37 @@ export function PropertyForm({
       isVerified: initialData?.isVerified || false,
       coverImage: initialData?.coverImage || "",
       otherImages: initialData?.otherImages || [],
+      propertyValueHistory: initialData?.propertyValueHistory || [],
     },
   });
 
   const handleSubmit = async (data: PropertyFormData) => {
-    await onSubmit(data);
+    console.group("🏠 Property Form Submission");
+    console.log("📝 Form Mode:", mode);
+    console.log("📋 Full Form Data:", data);
+    
+    // Specifically log propertyValueHistory
+    console.log("📊 Property Value History:", {
+      count: data.propertyValueHistory?.length || 0,
+      data: data.propertyValueHistory || [],
+      isEmpty: !data.propertyValueHistory || data.propertyValueHistory.length === 0
+    });
+    
+    // Log validation status
+    console.log("✅ Form Validation:", {
+      isValid: form.formState.isValid,
+      errors: form.formState.errors,
+      dirtyFields: form.formState.dirtyFields
+    });
+    
+    try {
+      await onSubmit(data);
+      console.log("✅ Form submission successful");
+    } catch (error) {
+      console.error("❌ Form submission failed:", error);
+    } finally {
+      console.groupEnd();
+    }
   };
 
   // Get visible fields sorted by group and order
@@ -542,6 +569,29 @@ export function PropertyForm({
           />
         );
 
+      // Property Value History
+      case "propertyValueHistory":
+        return (
+          <div key={fieldName} className="md:col-span-2 lg:col-span-3">
+            <FormField
+              name={fieldName}
+              control={form.control}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    {getFieldLabel(fieldName)} {isRequired && <span className="text-red-500">*</span>}
+                  </FormLabel>
+                  <PropertyValueHistoryInput
+                    value={field.value || []}
+                    onChange={field.onChange}
+                  />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+        );
+
       default:
         return null;
     }
@@ -630,6 +680,7 @@ const getFieldLabel = (fieldName: string): string => {
     apartmentType: "Apartment Type",
     isVerified: "Verified",
     coverImage: "Cover Image URL",
+    propertyValueHistory: "Property Value History",
   };
   return labels[fieldName] || fieldName;
 };

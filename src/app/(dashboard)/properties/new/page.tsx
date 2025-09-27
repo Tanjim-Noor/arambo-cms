@@ -15,16 +15,28 @@ export default function NewPropertyPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const handleSubmit = async (data: PropertyFormData) => {
+    console.group("📄 New Property Page - Handle Submit");
+    console.log("📝 Received Form Data:", data);
+    console.log("📊 Property Value History Check:", {
+      hasField: 'propertyValueHistory' in data,
+      isArray: Array.isArray(data.propertyValueHistory),
+      count: data.propertyValueHistory?.length || 0,
+      data: data.propertyValueHistory
+    });
+    
     try {
       setIsLoading(true)
-      await api.properties.create(data)
+      console.log("🚀 Calling API to create property...");
+      const result = await api.properties.create(data)
+      console.log("✅ Property created successfully:", result);
+      
       toast({
         title: "Success",
         description: "Property created successfully.",
       })
       router.push("/properties/confirmed")
     } catch (error) {
-      console.error("Error creating property:", error)
+      console.error("❌ Error creating property:", error)
       toast({
         title: "Error",
         description: "Failed to create property. Please try again.",
@@ -32,6 +44,7 @@ export default function NewPropertyPage() {
       })
     } finally {
       setIsLoading(false)
+      console.groupEnd();
     }
   }
 
