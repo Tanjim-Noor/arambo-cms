@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { CldUploadWidget, CloudinaryUploadWidgetResults } from "next-cloudinary"
+// import { CldUploadWidget, CloudinaryUploadWidgetResults } from "next-cloudinary"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { Card } from "@/components/ui/card"
@@ -42,77 +42,20 @@ export function ImageUploadModal({
   const [debugInfo, setDebugInfo] = useState<DebugInfo>({});
 
   // Debug environment variables
-  console.log("🔧 ImageUploadModal Debug Info:", {
-    cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-    apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
-    hasApiSecret: !!process.env.CLOUDINARY_API_SECRET,
-    currentValue: value,
-    single: single,
-    maxFiles: maxFiles
-  });
+  // console.log("🔧 ImageUploadModal Debug Info:", {
+  //   cloudName: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  //   apiKey: process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY,
+  //   hasApiSecret: !!process.env.CLOUDINARY_API_SECRET,
+  //   currentValue: value,
+  //   single: single,
+  //   maxFiles: maxFiles
+  // });
 
-  const handleUploadSuccess = (result: CloudinaryUploadWidgetResults) => {
-    console.log("✅ Upload Success - Full Result:", result);
-    console.log("📋 Upload Success - Result Info:", result?.info);
-    
-    if (result?.info && typeof result.info === 'object' && 'secure_url' in result.info) {
-      const newImage = {
-        id: result.info.public_id,
-        url: result.info.secure_url,
-        filename: result.info.original_filename || 'Uploaded image'
-      };
-      
-      console.log("🖼️ New Image Object:", newImage);
-      
-      setUploadedImages(prev => {
-        const updated = single ? [newImage] : [...prev, newImage];
-        console.log("📝 Updated Images State:", updated);
-        return updated;
-      });
-      
-      // Auto-close the dialog for single image uploads after successful upload
-      if (single) {
-        setTimeout(() => {
-          handleSaveImages();
-        }, 500);
-      }
-    } else {
-      console.error("❌ Upload Success - Invalid Result Structure:", result);
-      setDebugInfo(prev => ({ ...prev, lastError: "Invalid result structure" }));
-    }
-  };
+  // Removed handleUploadSuccess - no longer needed for direct upload
 
-  const handleUploadError = (error: unknown) => {
-    console.error("❌ Upload Error:", error);
-    const errorMessage = error instanceof Error ? error.message : String(error);
-    setDebugInfo(prev => ({ 
-      ...prev, 
-      lastError: errorMessage,
-      errorTime: new Date().toISOString()
-    }));
-  };
-
-  const handleWidgetOpen = () => {
-    console.log("🔓 Widget Opening");
-    setDebugInfo(prev => ({ 
-      ...prev, 
-      widgetOpened: true, 
-      openedAt: new Date().toISOString(),
-      lastError: null // Clear previous errors
-    }));
-  };
-
-  const handleWidgetClose = () => {
-    console.log("🔒 Widget Closing");
-    setDebugInfo(prev => ({ 
-      ...prev, 
-      widgetClosed: true, 
-      closedAt: new Date().toISOString() 
-    }));
-  };
-
+  // Removed widget-related handlers - no longer needed for direct upload
   // Debug info display (only in development)
-  console.log("📊 Current Debug Info:", debugInfo);
+  // console.log("📊 Current Debug Info:", debugInfo);
 
   const removeUploadedImage = (id: string) => {
     setUploadedImages(prev => prev.filter(img => img.id !== id));
@@ -275,7 +218,7 @@ export function ImageUploadModal({
           
           <div className="space-y-4">
             {/* Debug Info (only in development) */}
-            {process.env.NODE_ENV === 'development' && (
+            {/* {process.env.NODE_ENV === 'development' && (
               <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg text-xs space-y-2 font-mono">
                 <div className="font-semibold text-gray-800 mb-2">🔧 Debug Information</div>
                 <div className="grid grid-cols-2 gap-2">
@@ -308,173 +251,198 @@ export function ImageUploadModal({
                   </div>
                 )}
               </div>
-            )}
+            )} */}
 
-            {/* Upload Widget */}
+            {/* Direct File Upload */}
             {canUploadMore && (
-              <CldUploadWidget
-                uploadPreset="arambo_unsigned"
-                options={{
-                  multiple: !single,
-                  maxFiles: single ? 1 : maxFiles - (value?.length || 0),
-                  sources: ['local', 'camera', 'url'],
-                  resourceType: 'image',
-                  clientAllowedFormats: ['jpg', 'jpeg', 'png', 'webp', 'gif'],
-                  maxFileSize: 10000000, // 10MB
-                  showPoweredBy: false,
-                  folder: 'property-images',
-                  cropping: false,
-                  theme: 'minimal',
-                  showAdvancedOptions: false,
-                  showCompletedButton: true,
-                  showUploadMoreButton: false,
-                  preBatch: (cb: (data: unknown) => void, data: unknown) => {
-                    console.log("🎯 Pre-batch callback:", data);
-                    cb(data);
-                  },
-                }}
-                onSuccess={handleUploadSuccess}
-                onError={handleUploadError}
-                onOpen={handleWidgetOpen}
-                onClose={handleWidgetClose}
-                onQueuesEnd={(result, { widget }) => {
-                  console.log("📋 All uploads finished:", result);
-                  widget.close();
-                }}
-              >
-                {({ open, isLoading }) => {
-                  console.log("🎛️ Widget render state:", { isLoading });
-                  return (
-                    <div className="space-y-4">
-                      <Button
-                        type="button"
-                        variant="outline" 
-                        className="w-full p-8 h-auto border-2 border-dashed border-gray-300 hover:border-gray-400 transition-colors"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          console.log("🔵 Upload button clicked, opening widget...");
-                          console.log("🔧 Widget state before open:", { isLoading });
-                          try {
-                            open();
-                            console.log("✅ Widget open() called successfully");
-                          } catch (error) {
-                            console.error("❌ Error calling widget open():", error);
-                            setDebugInfo(prev => ({ ...prev, openError: error }));
-                          }
-                        }}
-                        disabled={isLoading}
-                      >
-                        <div className="flex flex-col items-center space-y-2">
-                          <Upload className="h-8 w-8 text-gray-400" />
-                          <div className="text-sm font-medium">
-                            {isLoading ? 'Opening widget...' : `Click to upload ${single ? 'an image' : 'images'}`}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Supports JPG, PNG, WebP, GIF up to 10MB
-                          </div>
-                        </div>
-                      </Button>
+              <div className="space-y-4">
+                <div className="text-center">
+                  <div className="text-sm font-medium text-gray-700 mb-2">Upload {single ? 'Image' : 'Images'}</div>
+                  <div className="text-xs text-gray-500 mb-4">
+                    Supports JPG, PNG, WebP, GIF up to 10MB each
+                  </div>
+                </div>
+                
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple={!single}
+                  onChange={async (e) => {
+                    const files = Array.from(e.target.files || []);
+                    // console.log("📁 Files selected for direct upload:", files);
+                    
+                    if (files.length === 0) return;
+                    
+                    try {
+                      // Show upload progress
+                      setDebugInfo(prev => ({ 
+                        ...prev, 
+                        lastError: null,
+                        uploadProgress: `Uploading ${files.length} file(s)...`
+                      }));
                       
-                      {/* Alternative: Direct file input as fallback */}
-                      <div className="border-t border-gray-200 pt-4">
-                        <div className="text-center mb-3">
-                          <div className="text-sm font-medium text-gray-700 mb-1">Alternative Upload Method</div>
-                          <div className="text-xs text-gray-500">If the main upload doesn&apos;t work, use this:</div>
-                        </div>
-                        <input
-                          type="file"
-                          accept="image/*"
-                          multiple={!single}
-                          onChange={async (e) => {
-                            const files = Array.from(e.target.files || []);
-                            console.log("📁 Files selected for direct upload:", files);
-                            
-                            if (files.length === 0) return;
-                            
-                            try {
-                              // Show upload progress
-                              setDebugInfo(prev => ({ 
-                                ...prev, 
-                                lastError: null,
-                                uploadProgress: `Uploading ${files.length} file(s)...`
-                              }));
-                              
-                              const uploadPromises = files.map(async (file) => {
-                                const formData = new FormData();
-                                formData.append('file', file);
-                                
-                                const response = await fetch('/api/direct-upload', {
-                                  method: 'POST',
-                                  body: formData,
-                                });
-                                
-                                const result = await response.json();
-                                
-                                if (!result.success) {
-                                  throw new Error(result.error || 'Upload failed');
-                                }
-                                
-                                return {
-                                  id: result.result.public_id,
-                                  url: result.result.secure_url,
-                                  filename: result.result.original_filename || file.name
-                                };
-                              });
-                              
-                              const uploadedFiles = await Promise.all(uploadPromises);
-                              console.log("✅ Direct upload successful:", uploadedFiles);
-                              
-                              setUploadedImages(prev => {
-                                const updated = single ? uploadedFiles.slice(0, 1) : [...prev, ...uploadedFiles];
-                                console.log("📝 Updated Images State (direct upload):", updated);
-                                return updated;
-                              });
-                              
-                              // Clear upload progress
-                              setDebugInfo(prev => ({ 
-                                ...prev, 
-                                uploadProgress: undefined,
-                                lastSuccess: `Successfully uploaded ${uploadedFiles.length} image(s)`,
-                                successTime: new Date().toISOString()
-                              }));
-                              
-                              // Reset the file input
-                              e.target.value = '';
-                              
-                            } catch (error) {
-                              console.error("❌ Direct upload failed:", error);
-                              const errorMessage = error instanceof Error ? error.message : String(error);
-                              setDebugInfo(prev => ({ 
-                                ...prev, 
-                                uploadProgress: undefined,
-                                lastError: `Direct upload failed: ${errorMessage}`,
-                                errorTime: new Date().toISOString()
-                              }));
-                            }
-                          }}
-                          className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all
-                            file:mr-4 file:py-2 file:px-4
-                            file:rounded-l-lg file:border-0
-                            file:text-sm file:font-semibold
-                            file:bg-blue-600 file:text-white
-                            hover:file:bg-blue-700 file:transition-colors"
-                        />
-                        {debugInfo.uploadProgress && (
-                          <div className="mt-2 text-xs text-blue-600 text-center">
-                            {debugInfo.uploadProgress}
-                          </div>
-                        )}
-                        {debugInfo.lastSuccess && (
-                          <div className="mt-2 text-xs text-green-600 text-center">
-                            ✅ {debugInfo.lastSuccess}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                }}
-              </CldUploadWidget>
+                      const uploadPromises = files.map(async (file) => {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        
+                        const response = await fetch('/api/direct-upload', {
+                          method: 'POST',
+                          body: formData,
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (!result.success) {
+                          throw new Error(result.error || 'Upload failed');
+                        }
+                        
+                        return {
+                          id: result.result.public_id,
+                          url: result.result.secure_url,
+                          filename: result.result.original_filename || file.name
+                        };
+                      });
+                      
+                      const uploadedFiles = await Promise.all(uploadPromises);
+                      // console.log("✅ Direct upload successful:", uploadedFiles);
+                      
+                      setUploadedImages(prev => {
+                        const updated = single ? uploadedFiles.slice(0, 1) : [...prev, ...uploadedFiles];
+                        // console.log("📝 Updated Images State (direct upload):", updated);
+                        return updated;
+                      });
+                      
+                      // Clear upload progress
+                      setDebugInfo(prev => ({ 
+                        ...prev, 
+                        uploadProgress: undefined,
+                        lastSuccess: `Successfully uploaded ${uploadedFiles.length} image(s)`,
+                        successTime: new Date().toISOString()
+                      }));
+                      
+                      // Reset the file input
+                      e.target.value = '';
+                      
+                    } catch (error) {
+                      // console.error("❌ Direct upload failed:", error);
+                      const errorMessage = error instanceof Error ? error.message : String(error);
+                      setDebugInfo(prev => ({ 
+                        ...prev, 
+                        uploadProgress: undefined,
+                        lastError: `Upload failed: ${errorMessage}`,
+                        errorTime: new Date().toISOString()
+                      }));
+                    }
+                  }}
+                  className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded-l-lg file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-600 file:text-white
+                    hover:file:bg-blue-700 file:transition-colors"
+                />
+                
+                {/* Upload Progress/Status */}
+                {debugInfo.uploadProgress && (
+                  <div className="text-xs text-blue-600 text-center">
+                    {debugInfo.uploadProgress}
+                  </div>
+                )}
+                {debugInfo.lastSuccess && (
+                  <div className="text-xs text-green-600 text-center">
+                    ✅ {debugInfo.lastSuccess}
+                  </div>
+                )}
+                {debugInfo.lastError && (
+                  <div className="text-xs text-red-600 text-center">
+                    ❌ {String(debugInfo.lastError)}
+                  </div>
+                )}
+                
+                {/* Drag and Drop Area */}
+                <div 
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-gray-400 transition-colors"
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                  onDrop={async (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    
+                    const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
+                    // console.log("🎯 Files dropped:", files);
+                    
+                    if (files.length === 0) return;
+                    
+                    try {
+                      // Show upload progress
+                      setDebugInfo(prev => ({ 
+                        ...prev, 
+                        lastError: null,
+                        uploadProgress: `Uploading ${files.length} file(s)...`
+                      }));
+                      
+                      const uploadPromises = files.map(async (file) => {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        
+                        const response = await fetch('/api/direct-upload', {
+                          method: 'POST',
+                          body: formData,
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (!result.success) {
+                          throw new Error(result.error || 'Upload failed');
+                        }
+                        
+                        return {
+                          id: result.result.public_id,
+                          url: result.result.secure_url,
+                          filename: result.result.original_filename || file.name
+                        };
+                      });
+                      
+                      const uploadedFiles = await Promise.all(uploadPromises);
+                      // console.log("✅ Drag & drop upload successful:", uploadedFiles);
+                      
+                      setUploadedImages(prev => {
+                        const updated = single ? uploadedFiles.slice(0, 1) : [...prev, ...uploadedFiles];
+                        // console.log("📝 Updated Images State (drag & drop):", updated);
+                        return updated;
+                      });
+                      
+                      // Clear upload progress
+                      setDebugInfo(prev => ({ 
+                        ...prev, 
+                        uploadProgress: undefined,
+                        lastSuccess: `Successfully uploaded ${uploadedFiles.length} image(s)`,
+                        successTime: new Date().toISOString()
+                      }));
+                      
+                    } catch (error) {
+                      // console.error("❌ Drag & drop upload failed:", error);
+                      const errorMessage = error instanceof Error ? error.message : String(error);
+                      setDebugInfo(prev => ({ 
+                        ...prev, 
+                        uploadProgress: undefined,
+                        lastError: `Upload failed: ${errorMessage}`,
+                        errorTime: new Date().toISOString()
+                      }));
+                    }
+                  }}
+                >
+                  <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
+                  <div className="text-sm font-medium text-gray-700 mb-1">
+                    Drag and drop {single ? 'an image' : 'images'} here
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    or use the file browser above
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Preview Uploaded Images */}
