@@ -60,7 +60,7 @@ export function PropertyForm({
       tenantType: initialData?.tenantType || undefined,
       propertyCategory: initialData?.propertyCategory || undefined,
       furnishingStatus: initialData?.furnishingStatus || undefined,
-      availableFrom: initialData?.availableFrom || undefined,
+      availableFrom: initialData?.availableFrom ? new Date(initialData.availableFrom) : undefined,
       floor: initialData?.floor || undefined,
       totalFloor: initialData?.totalFloor || undefined,
       yearOfConstruction: initialData?.yearOfConstruction || undefined,
