@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Loader2 } from "lucide-react";
+import { CalendarDays, Loader2, ExternalLink } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -711,6 +711,27 @@ export function PropertyForm({
             <Card key={groupKey}>
               <CardHeader>
                 <CardTitle>{formGroupLabels[groupKey as keyof typeof formGroupLabels]}</CardTitle>
+                {groupKey === 'map' && (
+                  <div className="space-y-3 pt-2">
+                    <div className="text-sm text-muted-foreground">
+                      <strong>How to get coordinates from Google Maps:</strong>
+                    </div>
+                    <ol className="text-sm text-muted-foreground space-y-1 ml-4 list-decimal">
+                      <li>Click on any location on the map</li>
+                      <li>Right-click and select &quot;What&apos;s here?&quot; or see the coordinates popup</li>
+                      <li>Copy the coordinates that appear (e.g., 23.7937, 90.4152)</li>
+                      <li>Paste the first number into <strong>GPS Latitude</strong> and the second number into <strong>GPS Longitude</strong></li>
+                    </ol>
+                    <a 
+                      href="https://maps.google.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      Open Google Maps <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -750,8 +771,8 @@ const getFieldLabel = (fieldName: string): string => {
     houseId: "House ID",
     streetAddress: "Street Address",
     landmark: "Landmark",
-    longitude: "Longitude",
-    latitude: "Latitude",
+    longitude: "GPS Longitude",
+    latitude: "GPS Latitude",
     area: "Area",
     listingId: "Listing ID",
     inventoryStatus: "Inventory Status",
