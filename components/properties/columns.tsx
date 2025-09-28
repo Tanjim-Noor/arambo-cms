@@ -99,6 +99,26 @@ export const createColumns = ({
     },
   },
   {
+    accessorKey: "coordinates",
+    header: "Coordinates",
+    cell: ({ row }) => {
+      const property = row.original
+      const hasCoordinates = property.longitude !== undefined && property.latitude !== undefined
+      return (
+        <div className="text-sm">
+          {hasCoordinates ? (
+            <div>
+              <div className="font-mono text-xs">{property.latitude?.toFixed(4)}</div>
+              <div className="font-mono text-xs text-muted-foreground">{property.longitude?.toFixed(4)}</div>
+            </div>
+          ) : (
+            <span className="text-muted-foreground">-</span>
+          )}
+        </div>
+      )
+    },
+  },
+  {
     accessorKey: "bedrooms",
     header: ({ column }) => {
       return (
