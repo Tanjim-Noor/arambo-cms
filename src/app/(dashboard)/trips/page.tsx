@@ -21,6 +21,8 @@ export default function TripsPage() {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editingTrip, setEditingTrip] = useState<Trip | null>(null)
   const [productTypeFilter, setProductTypeFilter] = useState<string>("all")
   const [timeSlotFilter, setTimeSlotFilter] = useState<string>("all")
   const { toast } = useToast()
@@ -37,39 +39,7 @@ export default function TripsPage() {
         description: "Failed to fetch trips. Please try again.",
         variant: "destructive",
       })
-      // Mock data for development
-      setTrips([
-        {
-          id: "1",
-          name: "Ahmed Hassan",
-          phone: "01712345678",
-          email: "ahmed@example.com",
-          productType: "Fragile",
-          pickupLocation: "Dhanmondi 27, Dhaka",
-          dropOffLocation: "Chittagong Port, Chittagong",
-          preferredDate: new Date(Date.now() + 86400000 * 3).toISOString(),
-          preferredTimeSlot: "Morning (8AM - 12PM)",
-          additionalNotes: "Handle with extreme care - electronic equipment",
-          truckId: "truck-001",
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          name: "Fatima Rahman",
-          phone: "01987654321",
-          email: "fatima@example.com",
-          productType: "Non-Perishable Goods",
-          pickupLocation: "Gulshan 2, Dhaka",
-          dropOffLocation: "Sylhet City, Sylhet",
-          preferredDate: new Date(Date.now() + 86400000 * 5).toISOString(),
-          preferredTimeSlot: "Afternoon (12PM - 4PM)",
-          additionalNotes: "Furniture items - need extra hands for loading",
-          truckId: "truck-002",
-          createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ] as Trip[])
+      setTrips([])
     } finally {
       setLoading(false)
     }
@@ -85,14 +55,14 @@ export default function TripsPage() {
   }
 
   const handleEdit = (trip: Trip) => {
-    // Navigate to edit page or open edit modal
-    console.log("Edit trip:", trip.id)
+    setEditingTrip(trip)
+    setEditOpen(true)
   }
 
   const handleDelete = async (trip: Trip) => {
     if (confirm("Are you sure you want to delete this trip?")) {
       try {
-        // await api.trips.delete(trip.id)
+        await api.trips.delete(trip.id)
         toast({
           title: "Success",
           description: "Trip deleted successfully.",
@@ -236,6 +206,14 @@ export default function TripsPage() {
       <TripDetailsModal trip={selectedTrip} open={detailsOpen} onOpenChange={setDetailsOpen} />
 
       <CreateTripForm open={createOpen} onOpenChange={setCreateOpen} onSuccess={fetchTrips} />
+      
+      <CreateTripForm 
+        open={editOpen} 
+        onOpenChange={setEditOpen} 
+        onSuccess={fetchTrips}
+        trip={editingTrip || undefined}
+        mode="edit"
+      />
     </div>
   )
 }

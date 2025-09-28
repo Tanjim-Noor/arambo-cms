@@ -142,7 +142,7 @@ export interface Trip {
   preferredDate: string
   preferredTimeSlot: "Morning (8AM - 12PM)" | "Afternoon (12PM - 4PM)" | "Evening (4PM - 8PM)"
   additionalNotes?: string
-  truckId: string
+  truckId: string  
   createdAt: string
   updatedAt: string
 }

@@ -501,34 +501,48 @@ export const createColumns = ({
       const property = row.original
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onView?.(property)}>
-              <Eye className="mr-2 h-4 w-4" />
-              View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => onEdit?.(property)}>
-              <Edit className="mr-2 h-4 w-4" />
-              Edit
-            </DropdownMenuItem>
-            {showConfirmAction && (
-              <DropdownMenuItem onClick={() => onConfirm?.(property)}>
-                <CheckCircle className="mr-2 h-4 w-4" />
-                Confirm Property
+        <div onClick={(e) => e.stopPropagation()}>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation()
+                onView?.(property)
+              }}>
+                <Eye className="mr-2 h-4 w-4" />
+                View Details
               </DropdownMenuItem>
-            )}
-            <DropdownMenuItem onClick={() => onDelete?.(property)} className="text-destructive">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation()
+                onEdit?.(property)
+              }}>
+                <Edit className="mr-2 h-4 w-4" />
+                Edit
+              </DropdownMenuItem>
+              {showConfirmAction && (
+                <DropdownMenuItem onClick={(e) => {
+                  e.stopPropagation()
+                  onConfirm?.(property)
+                }}>
+                  <CheckCircle className="mr-2 h-4 w-4" />
+                  Confirm Property
+                </DropdownMenuItem>
+              )}
+              <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation()
+                onDelete?.(property)
+              }} className="text-destructive">
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       )
     },
   },

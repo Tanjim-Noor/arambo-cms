@@ -12,6 +12,7 @@ import { Switch } from "@/components/ui/switch"
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import type { Truck } from "@/types"
 
 const truckSchema = z.object({
   modelNumber: z
@@ -24,7 +25,7 @@ const truckSchema = z.object({
     .min(1, "Height must be at least 1 ft")
     .max(100, "Height must be less than 100 ft")
     .positive("Height must be positive"),
-  isOpen: z.boolean().default(true),
+  isOpen: z.boolean(),
   description: z.string().max(500, "Description must be less than 500 characters").optional(),
 })
 
@@ -34,14 +35,13 @@ interface CreateTruckFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
-  truck?: any // For edit mode
+  truck?: Truck // For edit mode
+  mode?: 'create' | 'edit'
 }
 
-export function CreateTruckForm({ open, onOpenChange, onSuccess, truck }: CreateTruckFormProps) {
+export function CreateTruckForm({ open, onOpenChange, onSuccess, truck, mode = 'create' }: CreateTruckFormProps) {
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
-  const isEdit = !!truck
-
   const form = useForm<TruckFormData>({
     resolver: zodResolver(truckSchema),
     defaultValues: {
@@ -55,7 +55,7 @@ export function CreateTruckForm({ open, onOpenChange, onSuccess, truck }: Create
   const onSubmit = async (data: TruckFormData) => {
     try {
       setLoading(true)
-      if (isEdit) {
+      if (mode === 'edit' && truck?.id) {
         await api.trucks.update(truck.id, data)
         toast({
           title: "Success",
@@ -74,7 +74,7 @@ export function CreateTruckForm({ open, onOpenChange, onSuccess, truck }: Create
     } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to ${isEdit ? "update" : "create"} truck. Please try again.`,
+        description: `Failed to ${mode} truck. Please try again.`,
         variant: "destructive",
       })
     } finally {
@@ -86,9 +86,9 @@ export function CreateTruckForm({ open, onOpenChange, onSuccess, truck }: Create
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Truck" : "Add New Truck"}</DialogTitle>
+          <DialogTitle>{mode === 'edit' ? "Edit Truck" : "Add New Truck"}</DialogTitle>
           <DialogDescription>
-            {isEdit ? "Update truck information" : "Fill in the details to add a new truck to your fleet"}
+            {mode === 'edit' ? "Update truck information" : "Fill in the details to add a new truck to your fleet"}
           </DialogDescription>
         </DialogHeader>
 
@@ -170,7 +170,10 @@ export function CreateTruckForm({ open, onOpenChange, onSuccess, truck }: Create
                 Cancel
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? (isEdit ? "Updating..." : "Creating...") : isEdit ? "Update Truck" : "Create Truck"}
+                {loading 
+                  ? (mode === 'edit' ? "Updating..." : "Creating...") 
+                  : (mode === 'edit' ? "Update Truck" : "Create Truck")
+                }
               </Button>
             </div>
           </form>

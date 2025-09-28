@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import type { Furniture } from "@/types"
 
 const furnitureSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
@@ -27,13 +28,13 @@ interface CreateFurnitureFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
-  furniture?: any // For edit mode
+  furniture?: Furniture
+  mode?: 'create' | 'edit'
 }
 
-export function CreateFurnitureForm({ open, onOpenChange, onSuccess, furniture }: CreateFurnitureFormProps) {
+export function CreateFurnitureForm({ open, onOpenChange, onSuccess, furniture, mode = 'create' }: CreateFurnitureFormProps) {
   const [loading, setLoading] = useState(false)
   const { toast } = useToast()
-  const isEdit = !!furniture
 
   const form = useForm<FurnitureFormData>({
     resolver: zodResolver(furnitureSchema),
@@ -50,8 +51,8 @@ export function CreateFurnitureForm({ open, onOpenChange, onSuccess, furniture }
   const onSubmit = async (data: FurnitureFormData) => {
     try {
       setLoading(true)
-      if (isEdit) {
-        await api.furniture.update(furniture._id, data)
+      if (mode === 'edit' && furniture?.id) {
+        await api.furniture.update(furniture.id, data)
         toast({
           title: "Success",
           description: "Furniture request updated successfully.",
@@ -69,7 +70,7 @@ export function CreateFurnitureForm({ open, onOpenChange, onSuccess, furniture }
     } catch (error) {
       toast({
         title: "Error",
-        description: `Failed to ${isEdit ? "update" : "create"} furniture request. Please try again.`,
+        description: `Failed to ${mode} furniture request. Please try again.`,
         variant: "destructive",
       })
     } finally {
@@ -81,9 +82,9 @@ export function CreateFurnitureForm({ open, onOpenChange, onSuccess, furniture }
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-md">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Furniture Request" : "New Furniture Request"}</DialogTitle>
+          <DialogTitle>{mode === 'edit' ? "Edit Furniture Request" : "New Furniture Request"}</DialogTitle>
           <DialogDescription>
-            {isEdit ? "Update furniture request information" : "Fill in the details for a new furniture request"}
+            {mode === 'edit' ? "Update furniture request information" : "Fill in the details for a new furniture request"}
           </DialogDescription>
         </DialogHeader>
 
@@ -209,7 +210,10 @@ export function CreateFurnitureForm({ open, onOpenChange, onSuccess, furniture }
                 Cancel
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? (isEdit ? "Updating..." : "Creating...") : isEdit ? "Update Request" : "Create Request"}
+                {loading 
+                  ? (mode === 'edit' ? "Updating..." : "Creating...")
+                  : (mode === 'edit' ? "Update Request" : "Create Request")
+                }
               </Button>
             </div>
           </form>

@@ -122,7 +122,7 @@ export function TripDetailsModal({ trip, open, onOpenChange }: TripDetailsModalP
               <Truck className="h-4 w-4 text-muted-foreground" />
               <div>
                 <div className="text-sm text-muted-foreground">Truck ID</div>
-                <div className="font-medium font-mono">{trip.truckId}</div>
+                <div className="font-medium font-mono">{trip.truckId || "Not assigned"}</div>
               </div>
             </div>
           </div>

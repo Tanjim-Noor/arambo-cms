@@ -9,6 +9,7 @@ import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import type { Trip } from "@/types"
+import { api } from "@/lib/api"
 
 export default function EditTripPage() {
   const router = useRouter()
@@ -23,23 +24,8 @@ export default function EditTripPage() {
     const fetchTrip = async () => {
       try {
         setLoading(true)
-        // Mock data for now - replace with actual API call
-        const mockTrip: Trip = {
-          id: tripId,
-          name: "Ahmed Hassan",
-          phone: "01712345678",
-          email: "ahmed@example.com",
-          productType: "Fragile",
-          pickupLocation: "Dhanmondi 27, Dhaka",
-          dropOffLocation: "Chittagong Port, Chittagong",
-          preferredDate: new Date(Date.now() + 86400000 * 3).toISOString(),
-          preferredTimeSlot: "Morning (8AM - 12PM)",
-          additionalNotes: "Handle with extreme care - electronic equipment",
-          truckId: "truck-001",
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-          updatedAt: new Date().toISOString(),
-        }
-        setTrip(mockTrip)
+        const response = await api.trips.getById(tripId)
+        setTrip(response)
       } catch (error) {
         console.error("Error fetching trip:", error)
         toast({
@@ -58,7 +44,7 @@ export default function EditTripPage() {
     }
   }, [tripId, router, toast])
 
-  const handleSuccess = (updatedTrip: Trip) => {
+  const handleSuccess = () => {
     toast({
       title: "Success",
       description: "Trip updated successfully.",
@@ -118,7 +104,13 @@ export default function EditTripPage() {
       </div>
 
       <div className="max-w-2xl">
-        <CreateTripForm trip={trip} isEdit onSuccess={handleSuccess} />
+        <CreateTripForm 
+          open={true}
+          onOpenChange={() => router.push("/trips")}
+          trip={trip} 
+          mode="edit" 
+          onSuccess={handleSuccess} 
+        />
       </div>
     </div>
   )
