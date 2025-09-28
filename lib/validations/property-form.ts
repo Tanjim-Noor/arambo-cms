@@ -37,7 +37,6 @@ export const propertyFormSchema = z.object({
   bathroom: z.number()
     .min(0, "Bathrooms cannot be negative")
     .max(50, "Too many bathrooms"),
-  category: z.enum(["Furnished", "Semi-Furnished", "Non-Furnished"] as const),
 
   // Optional Property Details
   propertyType: z.enum(["Apartment", "House", "Villa"] as const).optional(),
@@ -72,7 +71,7 @@ export const propertyFormSchema = z.object({
   inventoryStatus: z.enum(["Looking for Rent", "Found Tenant", "Owner Unreachable"] as const).optional(),
   tenantType: z.enum(["Family", "Bachelor", "Women"] as const).optional(),
   propertyCategory: z.enum(["Residential", "Commercial"] as const).optional(),
-  furnishingStatus: z.enum(["Non-Furnished", "Semi-Furnished", "Furnished"] as const).optional(),
+  furnishingStatus: z.enum(["Non-Furnished", "Semi-Furnished", "Furnished"] as const),
   
   // Dates and Numbers - Optional
   availableFrom: z.date().optional(),

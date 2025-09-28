@@ -50,7 +50,6 @@ export function PropertyForm({
       bedrooms: initialData?.bedrooms || 0,
       bathroom: initialData?.bathroom || 0,
       baranda: initialData?.baranda || undefined,
-      category: initialData?.category || "Non-Furnished",
       notes: initialData?.notes || "",
       houseId: initialData?.houseId || "",
       streetAddress: initialData?.streetAddress || "",
@@ -62,7 +61,7 @@ export function PropertyForm({
       inventoryStatus: initialData?.inventoryStatus || undefined,
       tenantType: initialData?.tenantType || undefined,
       propertyCategory: initialData?.propertyCategory || undefined,
-      furnishingStatus: initialData?.furnishingStatus || undefined,
+      furnishingStatus: initialData?.furnishingStatus || "Non-Furnished",
       availableFrom: initialData?.availableFrom ? new Date(initialData.availableFrom) : undefined,
       floor: initialData?.floor || undefined,
       totalFloor: initialData?.totalFloor || undefined,
@@ -378,35 +377,6 @@ export function PropertyForm({
                     <SelectItem value="Apartment">Apartment</SelectItem>
                     <SelectItem value="House">House</SelectItem>
                     <SelectItem value="Villa">Villa</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        );
-
-      case "category":
-        return (
-          <FormField
-            key={fieldName}
-            name={fieldName}
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {getFieldLabel(fieldName)} {isRequired && <span className="text-red-500">*</span>}
-                </FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Furnished">Furnished</SelectItem>
-                    <SelectItem value="Semi-Furnished">Semi-Furnished</SelectItem>
-                    <SelectItem value="Non-Furnished">Non-Furnished</SelectItem>
                   </SelectContent>
                 </Select>
                 <FormMessage />
@@ -776,7 +746,6 @@ const getFieldLabel = (fieldName: string): string => {
     bedrooms: "Bedrooms",
     bathroom: "Bathrooms", 
     baranda: "Balcony/Baranda",
-    category: "Category",
     notes: "Additional Notes",
     houseId: "House ID",
     streetAddress: "Street Address",
