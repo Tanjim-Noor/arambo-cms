@@ -22,7 +22,8 @@ export default function TrucksPage() {
   const [selectedTruck, setSelectedTruck] = useState<Truck | null>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
-  const [editTruck, setEditTruck] = useState<Truck | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editingTruck, setEditingTruck] = useState<Truck | null>(null)
   const [statusFilter, setStatusFilter] = useState<string>("all")
   const [heightFilter, setHeightFilter] = useState<string>("all")
   const { toast } = useToast()
@@ -39,36 +40,7 @@ export default function TrucksPage() {
         description: "Failed to fetch trucks. Please try again.",
         variant: "destructive",
       })
-      // Mock data for development
-      setTrucks([
-        {
-          id: "1",
-          modelNumber: "TR-001",
-          height: 15,
-          isOpen: true,
-          description: "Heavy duty truck for large cargo",
-          createdAt: new Date(Date.now() - 86400000 * 30).toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: "2",
-          modelNumber: "TR-002",
-          height: 12,
-          isOpen: false,
-          description: "Medium size truck for regular deliveries",
-          createdAt: new Date(Date.now() - 86400000 * 15).toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          id: "3",
-          modelNumber: "TR-003",
-          height: 8,
-          isOpen: true,
-          description: "Light truck for small packages",
-          createdAt: new Date(Date.now() - 86400000 * 7).toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ] as Truck[])
+      setTrucks([])
     } finally {
       setLoading(false)
     }
@@ -84,14 +56,14 @@ export default function TrucksPage() {
   }
 
   const handleEdit = (truck: Truck) => {
-    setEditTruck(truck)
-    setCreateOpen(true)
+    setEditingTruck(truck)
+    setEditOpen(true)
   }
 
   const handleDelete = async (truck: Truck) => {
     if (confirm("Are you sure you want to delete this truck? This action cannot be undone.")) {
       try {
-        // await api.trucks.delete(truck.id)
+        await api.trucks.delete(truck.id)
         toast({
           title: "Success",
           description: "Truck deleted successfully.",
@@ -109,13 +81,25 @@ export default function TrucksPage() {
 
   const handleCreateSuccess = () => {
     fetchTrucks()
-    setEditTruck(null)
+    setEditingTruck(null)
   }
 
   const handleCreateClose = (open: boolean) => {
     setCreateOpen(open)
     if (!open) {
-      setEditTruck(null)
+      setEditingTruck(null)
+    }
+  }
+
+  const handleEditSuccess = () => {
+    fetchTrucks()
+    setEditingTruck(null)
+  }
+
+  const handleEditClose = (open: boolean) => {
+    setEditOpen(open)
+    if (!open) {
+      setEditingTruck(null)
     }
   }
 
@@ -263,7 +247,14 @@ export default function TrucksPage() {
         open={createOpen}
         onOpenChange={handleCreateClose}
         onSuccess={handleCreateSuccess}
-        truck={editTruck}
+      />
+
+      <CreateTruckForm
+        open={editOpen}
+        onOpenChange={handleEditClose}
+        onSuccess={handleEditSuccess}
+        truck={editingTruck || undefined}
+        mode="edit"
       />
     </div>
   )

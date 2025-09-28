@@ -25,63 +25,31 @@ export const api = {
       return response.json()
     },
     create: async (data: Omit<Property, 'id' | 'createdAt' | 'updatedAt'>) => {
-      console.group("🚀 API: Creating Property");
-      console.log("📤 Request Data:", data);
-      console.log("📊 Property Value History in API:", {
-        hasHistory: !!data.propertyValueHistory,
-        count: data.propertyValueHistory?.length || 0,
-        data: data.propertyValueHistory || []
-      });
-      
       const response = await fetch(`${API_BASE_URL}/properties`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
       
-      const responseData = await response.json();
-      console.log("📥 Response Status:", response.status);
-      console.log("📥 Response Data:", responseData);
-      
-      if (!response.ok) {
-        console.error("❌ API Error:", responseData);
-        console.groupEnd();
-        throw new Error("Failed to create property")
-      }
-      
-      console.log("✅ Property created successfully");
-      console.groupEnd();
-      return responseData;
+      if (!response.ok) throw new Error("Failed to create property")
+      return response.json()
     },
     update: async (id: string, data: Partial<Property>) => {
-      console.group("🔄 API: Updating Property");
-      console.log("🆔 Property ID:", id);
-      console.log("📤 Request Data:", data);
-      console.log("📊 Property Value History in API:", {
-        hasHistory: !!data.propertyValueHistory,
-        count: data.propertyValueHistory?.length || 0,
-        data: data.propertyValueHistory || []
-      });
-      
       const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
       
-      const responseData = await response.json();
-      console.log("📥 Response Status:", response.status);
-      console.log("📥 Response Data:", responseData);
-      
-      if (!response.ok) {
-        console.error("❌ API Error:", responseData);
-        console.groupEnd();
-        throw new Error("Failed to update property")
-      }
-      
-      console.log("✅ Property updated successfully");
-      console.groupEnd();
-      return responseData;
+      if (!response.ok) throw new Error("Failed to update property")
+      return response.json()
+    },
+    delete: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
+        method: "DELETE",
+      })
+      if (!response.ok) throw new Error("Failed to delete property")
+      return response.json()
     },
     getStats: async (): Promise<PropertyStats> => {
       const response = await fetch(`${API_BASE_URL}/properties/stats`)
@@ -97,6 +65,11 @@ export const api = {
       if (!response.ok) throw new Error("Failed to fetch trips")
       return response.json()
     },
+    getById: async (id: string): Promise<Trip> => {
+      const response = await fetch(`${API_BASE_URL}/trips/${id}`)
+      if (!response.ok) throw new Error("Failed to fetch trip")
+      return response.json()
+    },
     create: async (data: Omit<Trip, 'id' | 'createdAt' | 'updatedAt'>) => {
       const response = await fetch(`${API_BASE_URL}/trips`, {
         method: "POST",
@@ -104,6 +77,25 @@ export const api = {
         body: JSON.stringify(data),
       })
       if (!response.ok) throw new Error("Failed to create trip")
+      return response.json()
+    },
+    update: async (id: string, data: Partial<Trip>) => {
+      const response = await fetch(`${API_BASE_URL}/trips/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      })
+      if (!response.ok) {
+        const errorText = await response.text()
+        throw new Error(`Failed to update trip: ${errorText}`)
+      }
+      return response.json()
+    },
+    delete: async (id: string) => {
+      const response = await fetch(`${API_BASE_URL}/trips/${id}`, {
+        method: "DELETE",
+      })
+      if (!response.ok) throw new Error("Failed to delete trip")
       return response.json()
     },
   },
@@ -161,12 +153,24 @@ export const api = {
       const url = `${API_BASE_URL}/furniture${searchParams.toString() ? `?${searchParams.toString()}` : ""}`
       const response = await fetch(url)
       if (!response.ok) throw new Error("Failed to fetch furniture")
-      return response.json()
+      const result = await response.json()
+      // Backend returns {data: [...]} format, we need just the array
+      const furnitureList = result.data || result
+      // Convert _id to id for consistency
+      return furnitureList.map((item: any) => ({
+        ...item,
+        id: item._id || item.id
+      }))
     },
     getById: async (id: string): Promise<Furniture> => {
       const response = await fetch(`${API_BASE_URL}/furniture/${id}`)
       if (!response.ok) throw new Error("Failed to fetch furniture")
-      return response.json()
+      const result = await response.json()
+      // Convert _id to id for consistency
+      if (result._id && !result.id) {
+        result.id = result._id
+      }
+      return result
     },
     create: async (data: Omit<Furniture, 'id' | 'createdAt' | 'updatedAt'>) => {
       const response = await fetch(`${API_BASE_URL}/furniture`, {
@@ -175,7 +179,12 @@ export const api = {
         body: JSON.stringify(data),
       })
       if (!response.ok) throw new Error("Failed to create furniture request")
-      return response.json()
+      const result = await response.json()
+      // Convert _id to id for consistency
+      if (result._id && !result.id) {
+        result.id = result._id
+      }
+      return result
     },
     update: async (id: string, data: Partial<Furniture>) => {
       const response = await fetch(`${API_BASE_URL}/furniture/${id}`, {
@@ -184,7 +193,12 @@ export const api = {
         body: JSON.stringify(data),
       })
       if (!response.ok) throw new Error("Failed to update furniture request")
-      return response.json()
+      const result = await response.json()
+      // Convert _id to id for consistency
+      if (result._id && !result.id) {
+        result.id = result._id
+      }
+      return result
     },
     delete: async (id: string) => {
       const response = await fetch(`${API_BASE_URL}/furniture/${id}`, {

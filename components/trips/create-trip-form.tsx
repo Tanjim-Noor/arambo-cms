@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -17,6 +17,7 @@ import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import type { Trip, Truck } from "@/types"
 
 const tripSchema = z.object({
   name: z.string().min(1, "Name is required").max(100, "Name must be less than 100 characters"),
@@ -32,10 +33,10 @@ const tripSchema = z.object({
     .min(1, "Drop-off location is required")
     .max(300, "Location must be less than 300 characters"),
   preferredDate: z.date({
-    required_error: "Preferred date is required",
+    message: "Preferred date is required",
   }),
   preferredTimeSlot: z.enum(["Morning (8AM - 12PM)", "Afternoon (12PM - 4PM)", "Evening (4PM - 8PM)"]),
-  truckId: z.string().min(1, "Truck selection is required"),
+  truckId: z.string().optional(),
   additionalNotes: z.string().max(500, "Notes must be less than 500 characters").optional(),
 })
 
@@ -45,45 +46,88 @@ interface CreateTripFormProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSuccess: () => void
+  trip?: Trip
+  mode?: 'create' | 'edit'
 }
 
-export function CreateTripForm({ open, onOpenChange, onSuccess }: CreateTripFormProps) {
+export function CreateTripForm({ open, onOpenChange, onSuccess, trip, mode = 'create' }: CreateTripFormProps) {
   const [loading, setLoading] = useState(false)
+  const [trucks, setTrucks] = useState<Truck[]>([])
+  const [trucksLoading, setTrucksLoading] = useState(false)
   const { toast } = useToast()
 
   const form = useForm<TripFormData>({
     resolver: zodResolver(tripSchema),
     defaultValues: {
-      name: "",
-      phone: "",
-      email: "",
-      productType: "Non-Perishable Goods",
-      pickupLocation: "",
-      dropOffLocation: "",
-      preferredTimeSlot: "Morning (8AM - 12PM)",
-      truckId: "",
-      additionalNotes: "",
+      name: trip?.name || "",
+      phone: trip?.phone || "",
+      email: trip?.email || "",
+      productType: trip?.productType || "Non-Perishable Goods",
+      pickupLocation: trip?.pickupLocation || "",
+      dropOffLocation: trip?.dropOffLocation || "",
+      preferredDate: trip?.preferredDate ? new Date(trip.preferredDate) : undefined,
+      preferredTimeSlot: trip?.preferredTimeSlot || "Morning (8AM - 12PM)",
+      truckId: trip?.truckId || "no-truck",
+      additionalNotes: trip?.additionalNotes || "",
     },
   })
+
+  // Load trucks when component mounts
+  useEffect(() => {
+    const fetchTrucks = async () => {
+      try {
+        setTrucksLoading(true)
+        const trucksData = await api.trucks.getAll()
+        setTrucks(trucksData || [])
+      } catch (error) {
+        console.error("Error fetching trucks:", error)
+        toast({
+          title: "Warning",
+          description: "Failed to load trucks. You can still create the trip without assigning a truck.",
+          variant: "destructive",
+        })
+      } finally {
+        setTrucksLoading(false)
+      }
+    }
+
+    if (open) {
+      fetchTrucks()
+    }
+  }, [open, toast])
 
   const onSubmit = async (data: TripFormData) => {
     try {
       setLoading(true)
-      await api.trips.create({
+      
+      // Clean up the data before submission
+      const submitData = {
         ...data,
         preferredDate: data.preferredDate.toISOString(),
-      })
-      toast({
-        title: "Success",
-        description: "Trip created successfully.",
-      })
+        truckId: data.truckId, // Send undefined for no truck
+      }
+
+      if (mode === 'edit' && trip?.id) {
+        await api.trips.update(trip.id, submitData)
+        toast({
+          title: "Success",
+          description: "Trip updated successfully.",
+        })
+      } else {
+        await api.trips.create(submitData)
+        toast({
+          title: "Success",
+          description: "Trip created successfully.",
+        })
+      }
+      
       form.reset()
       onOpenChange(false)
       onSuccess()
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to create trip. Please try again.",
+        description: `Failed to ${mode} trip. Please try again.`,
         variant: "destructive",
       })
     } finally {
@@ -95,8 +139,10 @@ export function CreateTripForm({ open, onOpenChange, onSuccess }: CreateTripForm
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create New Trip</DialogTitle>
-          <DialogDescription>Fill in the details to schedule a new trip</DialogDescription>
+          <DialogTitle>{mode === 'edit' ? 'Edit Trip' : 'Create New Trip'}</DialogTitle>
+          <DialogDescription>
+            {mode === 'edit' ? 'Update the trip details' : 'Fill in the details to schedule a new trip'}
+          </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
@@ -273,17 +319,25 @@ export function CreateTripForm({ open, onOpenChange, onSuccess }: CreateTripForm
               name="truckId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Assign Truck *</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormLabel>Assign Truck (Optional)</FormLabel>
+                  <Select 
+                    onValueChange={(value) => {
+                      field.onChange(value === "no-truck" ? "" : value)
+                    }} 
+                    defaultValue={field.value || "no-truck"}
+                  >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Select truck" />
+                        <SelectValue placeholder={trucksLoading ? "Loading trucks..." : "Select truck"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="truck-001">TR-001 - Heavy Duty (15ft)</SelectItem>
-                      <SelectItem value="truck-002">TR-002 - Medium (12ft)</SelectItem>
-                      <SelectItem value="truck-003">TR-003 - Light (8ft)</SelectItem>
+                      <SelectItem value="no-truck">No truck assigned</SelectItem>
+                      {trucks.map((truck) => (
+                        <SelectItem key={truck.id} value={truck.id}>
+                          {truck.modelNumber || `Truck ${truck.id.slice(-8)}`} - {truck.height}ft {truck.isOpen ? "(Open)" : "(Closed)"}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -315,7 +369,10 @@ export function CreateTripForm({ open, onOpenChange, onSuccess }: CreateTripForm
                 Cancel
               </Button>
               <Button type="submit" disabled={loading}>
-                {loading ? "Creating..." : "Create Trip"}
+                {loading 
+                  ? (mode === 'edit' ? "Updating..." : "Creating...")
+                  : (mode === 'edit' ? "Update Trip" : "Create Trip")
+                }
               </Button>
             </div>
           </form>

@@ -22,7 +22,8 @@ export default function FurniturePage() {
   const [selectedFurniture, setSelectedFurniture] = useState<Furniture | null>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
   const [createOpen, setCreateOpen] = useState(false)
-  const [editFurniture, setEditFurniture] = useState<Furniture | null>(null)
+  const [editOpen, setEditOpen] = useState(false)
+  const [editingFurniture, setEditingFurniture] = useState<Furniture | null>(null)
   const [typeFilter, setTypeFilter] = useState<string>("all")
   const [paymentFilter, setPaymentFilter] = useState<string>("all")
   const [conditionFilter, setConditionFilter] = useState<string>("all")
@@ -31,51 +32,16 @@ export default function FurniturePage() {
   const fetchFurniture = async () => {
     try {
       setLoading(true)
-      const response = await api.furniture.getAll({ limit: 1000 })
-      setFurniture(response.data || [])
+      const response = await api.furniture.getAll()
+      setFurniture(response || [])
     } catch (error) {
       console.error("Error fetching furniture:", error)
       toast({
-        title: "Error",
+        title: "Error", 
         description: "Failed to fetch furniture requests. Please try again.",
         variant: "destructive",
       })
-      // Mock data for development
-      setFurniture([
-        {
-          _id: "1",
-          name: "Sarah Ahmed",
-          email: "sarah@example.com",
-          phone: "01712345678",
-          furnitureType: "Commercial Furniture",
-          paymentType: "EMI Plan",
-          furnitureCondition: "New Furniture",
-          createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          _id: "2",
-          name: "Mohammad Rahman",
-          email: "mohammad@example.com",
-          phone: "01987654321",
-          furnitureType: "Residential Furniture",
-          paymentType: "Instant Pay",
-          furnitureCondition: "Used Furniture",
-          createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-        {
-          _id: "3",
-          name: "Fatima Khan",
-          email: "fatima@example.com",
-          phone: "01555666777",
-          furnitureType: "Residential Furniture",
-          paymentType: "Lease",
-          furnitureCondition: "New Furniture",
-          createdAt: new Date(Date.now() - 86400000 * 1).toISOString(),
-          updatedAt: new Date().toISOString(),
-        },
-      ] as Furniture[])
+      setFurniture([])
     } finally {
       setLoading(false)
     }
@@ -91,14 +57,14 @@ export default function FurniturePage() {
   }
 
   const handleEdit = (furniture: Furniture) => {
-    setEditFurniture(furniture)
-    setCreateOpen(true)
+    setEditingFurniture(furniture)
+    setEditOpen(true)
   }
 
   const handleDelete = async (furniture: Furniture) => {
     if (confirm("Are you sure you want to delete this furniture request?")) {
       try {
-        // await api.furniture.delete(furniture._id)
+        await api.furniture.delete(furniture.id)
         toast({
           title: "Success",
           description: "Furniture request deleted successfully.",
@@ -116,13 +82,21 @@ export default function FurniturePage() {
 
   const handleCreateSuccess = () => {
     fetchFurniture()
-    setEditFurniture(null)
   }
 
   const handleCreateClose = (open: boolean) => {
     setCreateOpen(open)
+  }
+
+  const handleEditSuccess = () => {
+    fetchFurniture()
+    setEditingFurniture(null)
+  }
+
+  const handleEditClose = (open: boolean) => {
+    setEditOpen(open)
     if (!open) {
-      setEditFurniture(null)
+      setEditingFurniture(null)
     }
   }
 
@@ -274,7 +248,14 @@ export default function FurniturePage() {
         open={createOpen}
         onOpenChange={handleCreateClose}
         onSuccess={handleCreateSuccess}
-        furniture={editFurniture}
+      />
+
+      <CreateFurnitureForm
+        open={editOpen}
+        onOpenChange={handleEditClose}
+        onSuccess={handleEditSuccess}
+        furniture={editingFurniture || undefined}
+        mode="edit"
       />
     </div>
   )

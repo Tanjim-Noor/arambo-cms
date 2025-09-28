@@ -53,7 +53,7 @@ export default function UnconfirmedPropertiesPage() {
   const handleDelete = async (property: Property) => {
     if (confirm(`Are you sure you want to delete "${property.propertyName}"?`)) {
       try {
-        // await api.properties.delete(property.id)
+        await api.properties.delete(property.id)
         toast({
           title: "Success",
           description: `Property "${property.propertyName}" deleted successfully.`,
@@ -63,7 +63,7 @@ export default function UnconfirmedPropertiesPage() {
         console.error('Error deleting property:', error)
         toast({
           title: "Error",
-          description: "Failed to delete property.",
+          description: "Failed to delete property. Please try again.",
           variant: "destructive",
         })
       }
