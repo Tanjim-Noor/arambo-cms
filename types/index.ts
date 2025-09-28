@@ -92,6 +92,10 @@ export interface Property {
   landmark?: string
   area?: Area
   listingId?: string
+  
+  // GPS Coordinates
+  longitude?: number
+  latitude?: number
   inventoryStatus?: InventoryStatus
   tenantType?: TenantType
   propertyCategory?: PropertyCategory

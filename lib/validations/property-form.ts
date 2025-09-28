@@ -47,6 +47,11 @@ export const propertyFormSchema = z.object({
   houseId: z.string().max(50, "House ID must be less than 50 characters").optional(),
   streetAddress: z.string().max(500, "Street address must be less than 500 characters").optional(),
   landmark: z.string().max(300, "Landmark must be less than 300 characters").optional(),
+  
+  // GPS Coordinates - Optional
+  longitude: z.number().min(-180, "Longitude must be between -180 and 180").max(180, "Longitude must be between -180 and 180").optional(),
+  latitude: z.number().min(-90, "Latitude must be between -90 and 90").max(90, "Latitude must be between -90 and 90").optional(),
+  
   area: z.enum([
     "Aftabnagar", "Banani", "Banani DOHs", "Banashree", "Banasree", "Baridhara DOHs", 
     "Baridhara J Block", "Bashundhara Residential", "Dhanmondi", "DIT & Merul Badda", 

@@ -37,6 +37,7 @@ export function PropertyForm({
 }: PropertyFormProps) {
   const form = useForm<PropertyFormData>({
     resolver: zodResolver(propertyFormSchema),
+    mode: 'onChange',
     defaultValues: {
       name: initialData?.name || "",
       email: initialData?.email || "",
@@ -54,6 +55,8 @@ export function PropertyForm({
       houseId: initialData?.houseId || "",
       streetAddress: initialData?.streetAddress || "",
       landmark: initialData?.landmark || "",
+      longitude: initialData?.longitude || undefined,
+      latitude: initialData?.latitude || undefined,
       area: initialData?.area || undefined,
       listingId: initialData?.listingId || "",
       inventoryStatus: initialData?.inventoryStatus || undefined,
@@ -255,6 +258,72 @@ export function PropertyForm({
                 <FormMessage />
               </FormItem>
             )}
+          />
+        );
+
+      // GPS Coordinates - Uncontrolled inputs to prevent value reset
+      case "longitude":
+      case "latitude":
+        return (
+          <FormField
+            key={fieldName}
+            name={fieldName}
+            control={form.control}
+            render={({ field }) => {
+              return (
+                <FormItem>
+                  <FormLabel>
+                    {getFieldLabel(fieldName)} {isRequired && <span className="text-red-500">*</span>}
+                  </FormLabel>
+                  <FormControl>
+                    <Input
+                      placeholder={getFieldPlaceholder(fieldName)}
+                      type="text"
+                      defaultValue={field.value !== undefined ? field.value.toString() : ""}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        
+                        if (value.trim() === "") {
+                          field.onChange(undefined);
+                        } else {
+                          // Allow partial input during typing
+                          const num = parseFloat(value);
+                          if (!isNaN(num)) {
+                            field.onChange(num);
+                          }
+                          // Don't update field if it's not a valid number yet
+                        }
+                      }}
+                      onBlur={(e) => {
+                        // Final validation on blur
+                        const value = e.target.value.trim();
+                        if (value === "") {
+                          field.onChange(undefined);
+                        } else {
+                          const num = parseFloat(value);
+                          if (!isNaN(num)) {
+                            field.onChange(num);
+                          } else {
+                            // Clear invalid input
+                            field.onChange(undefined);
+                            e.target.value = "";
+                          }
+                        }
+                        field.onBlur();
+                      }}
+                      onFocus={(e) => {
+                        // Ensure the input shows the current value when focused
+                        const currentValue = field.value;
+                        if (currentValue !== undefined) {
+                          e.target.value = currentValue.toString();
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         );
 
@@ -712,6 +781,8 @@ const getFieldLabel = (fieldName: string): string => {
     houseId: "House ID",
     streetAddress: "Street Address",
     landmark: "Landmark",
+    longitude: "Longitude",
+    latitude: "Latitude",
     area: "Area",
     listingId: "Listing ID",
     inventoryStatus: "Inventory Status",
@@ -764,6 +835,8 @@ const getFieldPlaceholder = (fieldName: string): string => {
     houseId: "Enter house ID",
     streetAddress: "Enter street address",
     landmark: "Enter nearby landmark",
+    longitude: "e.g., 90.4152 (GPS longitude)",
+    latitude: "e.g., 23.7937 (GPS latitude)",
     listingId: "Enter listing ID",
     floor: "Which floor",
     totalFloor: "Total floors in building",
