@@ -601,19 +601,19 @@ export function PropertyForm({
             name={fieldName}
             control={form.control}
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                 <FormControl>
                   <Checkbox
                     checked={Boolean(field.value)}
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
+                <div className="flex-1">
+                  <FormLabel className="text-sm font-medium leading-none cursor-pointer">
                     {getFieldLabel(fieldName)} {isRequired && <span className="text-red-500">*</span>}
                   </FormLabel>
+                  <FormMessage className="mt-1" />
                 </div>
-                <FormMessage />
               </FormItem>
             )}
           />
