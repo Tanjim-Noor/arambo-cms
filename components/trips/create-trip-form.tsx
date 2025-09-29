@@ -96,15 +96,37 @@ export function CreateTripForm({ open, onOpenChange, onSuccess, trip, mode = 'cr
     }
   }, [open, toast])
 
+  // Reset form with trip data when trip prop changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        name: trip?.name || "",
+        phone: trip?.phone || "",
+        email: trip?.email || "",
+        productType: trip?.productType || "Non-Perishable Goods",
+        pickupLocation: trip?.pickupLocation || "",
+        dropOffLocation: trip?.dropOffLocation || "",
+        preferredDate: trip?.preferredDate ? new Date(trip.preferredDate) : undefined,
+        preferredTimeSlot: trip?.preferredTimeSlot || "Morning (8AM - 12PM)",
+        truckId: trip?.truckId || "no-truck",
+        additionalNotes: trip?.additionalNotes || "",
+      })
+    }
+  }, [trip, open, form])
+
   const onSubmit = async (data: TripFormData) => {
     try {
       setLoading(true)
       
       // Clean up the data before submission
-      const submitData = {
+      const submitData: any = {
         ...data,
         preferredDate: data.preferredDate.toISOString(),
-        truckId: data.truckId, // Send undefined for no truck
+      }
+
+      // Only include truckId if it's not empty or undefined
+      if (data.truckId && data.truckId !== "") {
+        submitData.truckId = data.truckId
       }
 
       if (mode === 'edit' && trip?.id) {

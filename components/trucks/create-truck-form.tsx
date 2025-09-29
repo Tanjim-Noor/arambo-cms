@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -51,6 +51,18 @@ export function CreateTruckForm({ open, onOpenChange, onSuccess, truck, mode = '
       description: truck?.description || "",
     },
   })
+
+  // Reset form with truck data when truck prop changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        modelNumber: truck?.modelNumber || "",
+        height: truck?.height || 10,
+        isOpen: truck?.isOpen ?? true,
+        description: truck?.description || "",
+      })
+    }
+  }, [truck, open, form])
 
   const onSubmit = async (data: TruckFormData) => {
     try {

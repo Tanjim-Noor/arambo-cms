@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import * as z from "zod"
@@ -47,6 +47,20 @@ export function CreateFurnitureForm({ open, onOpenChange, onSuccess, furniture, 
       furnitureCondition: furniture?.furnitureCondition || undefined,
     },
   })
+
+  // Reset form with furniture data when furniture prop changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      form.reset({
+        name: furniture?.name || "",
+        email: furniture?.email || "",
+        phone: furniture?.phone || "",
+        furnitureType: furniture?.furnitureType || "Residential Furniture",
+        paymentType: furniture?.paymentType || undefined,
+        furnitureCondition: furniture?.furnitureCondition || undefined,
+      })
+    }
+  }, [furniture, open, form])
 
   const onSubmit = async (data: FurnitureFormData) => {
     try {
