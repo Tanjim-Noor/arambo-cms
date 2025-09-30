@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CalendarDays, Loader2 } from "lucide-react";
+import { CalendarDays, Loader2, ExternalLink } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -50,7 +50,6 @@ export function PropertyForm({
       bedrooms: initialData?.bedrooms || 0,
       bathroom: initialData?.bathroom || 0,
       baranda: initialData?.baranda || undefined,
-      category: initialData?.category || "Non-Furnished",
       notes: initialData?.notes || "",
       houseId: initialData?.houseId || "",
       streetAddress: initialData?.streetAddress || "",
@@ -62,7 +61,7 @@ export function PropertyForm({
       inventoryStatus: initialData?.inventoryStatus || undefined,
       tenantType: initialData?.tenantType || undefined,
       propertyCategory: initialData?.propertyCategory || undefined,
-      furnishingStatus: initialData?.furnishingStatus || undefined,
+      furnishingStatus: initialData?.furnishingStatus || "Non-Furnished",
       availableFrom: initialData?.availableFrom ? new Date(initialData.availableFrom) : undefined,
       floor: initialData?.floor || undefined,
       totalFloor: initialData?.totalFloor || undefined,
@@ -386,35 +385,6 @@ export function PropertyForm({
           />
         );
 
-      case "category":
-        return (
-          <FormField
-            key={fieldName}
-            name={fieldName}
-            control={form.control}
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>
-                  {getFieldLabel(fieldName)} {isRequired && <span className="text-red-500">*</span>}
-                </FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value="Furnished">Furnished</SelectItem>
-                    <SelectItem value="Semi-Furnished">Semi-Furnished</SelectItem>
-                    <SelectItem value="Non-Furnished">Non-Furnished</SelectItem>
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        );
-
       case "area":
         return (
           <FormField
@@ -631,19 +601,19 @@ export function PropertyForm({
             name={fieldName}
             control={form.control}
             render={({ field }) => (
-              <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+              <FormItem className="flex flex-row items-center space-x-3 space-y-0">
                 <FormControl>
                   <Checkbox
                     checked={Boolean(field.value)}
                     onCheckedChange={field.onChange}
                   />
                 </FormControl>
-                <div className="space-y-1 leading-none">
-                  <FormLabel>
+                <div className="flex-1">
+                  <FormLabel className="text-sm font-medium leading-none cursor-pointer">
                     {getFieldLabel(fieldName)} {isRequired && <span className="text-red-500">*</span>}
                   </FormLabel>
+                  <FormMessage className="mt-1" />
                 </div>
-                <FormMessage />
               </FormItem>
             )}
           />
@@ -741,6 +711,27 @@ export function PropertyForm({
             <Card key={groupKey}>
               <CardHeader>
                 <CardTitle>{formGroupLabels[groupKey as keyof typeof formGroupLabels]}</CardTitle>
+                {groupKey === 'map' && (
+                  <div className="space-y-3 pt-2">
+                    <div className="text-sm text-muted-foreground">
+                      <strong>How to get coordinates from Google Maps:</strong>
+                    </div>
+                    <ol className="text-sm text-muted-foreground space-y-1 ml-4 list-decimal">
+                      <li>Click on any location on the map</li>
+                      <li>Right-click and select &quot;What&apos;s here?&quot; or see the coordinates popup</li>
+                      <li>Copy the coordinates that appear (e.g., 23.7937, 90.4152)</li>
+                      <li>Paste the first number into <strong>GPS Latitude</strong> and the second number into <strong>GPS Longitude</strong></li>
+                    </ol>
+                    <a 
+                      href="https://maps.google.com" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      Open Google Maps <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -776,13 +767,12 @@ const getFieldLabel = (fieldName: string): string => {
     bedrooms: "Bedrooms",
     bathroom: "Bathrooms", 
     baranda: "Balcony/Baranda",
-    category: "Category",
     notes: "Additional Notes",
     houseId: "House ID",
     streetAddress: "Street Address",
     landmark: "Landmark",
-    longitude: "Longitude",
-    latitude: "Latitude",
+    longitude: "GPS Longitude",
+    latitude: "GPS Latitude",
     area: "Area",
     listingId: "Listing ID",
     inventoryStatus: "Inventory Status",

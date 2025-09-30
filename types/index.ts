@@ -1,6 +1,5 @@
 export type ListingType = "For Rent" | "For Sale" | "Both"
 export type PropertyType = "Apartment" | "House" | "Villa"
-export type Category = "Furnished" | "Semi-Furnished" | "Non-Furnished"
 export type InventoryStatus = "Looking for Rent" | "Found Tenant" | "Owner Unreachable"
 export type TenantType = "Family" | "Bachelor" | "Women"
 export type PropertyCategory = "Residential" | "Commercial"
@@ -76,7 +75,6 @@ export interface Property {
   bedrooms: number
   bathroom: number
   baranda?: number
-  category: Category
   notes?: string
   firstOwner?: boolean
   paperworkUpdated?: boolean
@@ -99,7 +97,7 @@ export interface Property {
   inventoryStatus?: InventoryStatus
   tenantType?: TenantType
   propertyCategory?: PropertyCategory
-  furnishingStatus?: FurnishingStatus
+  furnishingStatus: FurnishingStatus
   availableFrom?: Date
   floor?: number
   totalFloor?: number
@@ -171,7 +169,7 @@ export interface Furniture {
 
 export interface PropertyStats {
   total: number
-  byCategory: Record<string, number>
+  byFurnishingStatus: Record<string, number>
   byPropertyType: Record<string, number>
   avgSize: number
   avgBedrooms: number

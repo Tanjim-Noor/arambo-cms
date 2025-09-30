@@ -65,22 +65,28 @@ export const createColumns = ({
     },
   },
   {
-    accessorKey: "category",
-    header: "Category",
+    accessorKey: "furnishingStatus",
+    header: ({ column }) => {
+      return (
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+          Furnishing
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      )
+    },
     cell: ({ row }) => {
-      const category = row.getValue("category") as string
+      const status = row.getValue("furnishingStatus") as string
       const colors = {
-        Furnished: "bg-green-500/10 text-green-500 border-green-500/20",
+        "Furnished": "bg-green-500/10 text-green-500 border-green-500/20",
         "Semi-Furnished": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
         "Non-Furnished": "bg-gray-500/10 text-gray-500 border-gray-500/20",
       }
-      return (
-        <Badge
-          variant="outline"
-          className={colors[category as keyof typeof colors] || "bg-muted text-muted-foreground"}
-        >
-          {category}
+      return status ? (
+        <Badge variant="outline" className={colors[status as keyof typeof colors] || "bg-muted text-muted-foreground"}>
+          {status}
         </Badge>
+      ) : (
+        <span className="text-muted-foreground">-</span>
       )
     },
   },
@@ -403,25 +409,6 @@ export const createColumns = ({
       const type = row.getValue("apartmentType") as string
       return type ? (
         <span className="text-sm">{type}</span>
-      ) : (
-        <span className="text-muted-foreground">-</span>
-      )
-    },
-  },
-  {
-    accessorKey: "furnishingStatus",
-    header: "Furnishing",
-    cell: ({ row }) => {
-      const status = row.getValue("furnishingStatus") as string
-      const colors = {
-        "Furnished": "bg-green-500/10 text-green-500 border-green-500/20",
-        "Semi-Furnished": "bg-yellow-500/10 text-yellow-500 border-yellow-500/20",
-        "Non-Furnished": "bg-gray-500/10 text-gray-500 border-gray-500/20",
-      }
-      return status ? (
-        <Badge variant="outline" className={colors[status as keyof typeof colors] || "bg-muted text-muted-foreground"}>
-          {status}
-        </Badge>
       ) : (
         <span className="text-muted-foreground">-</span>
       )
