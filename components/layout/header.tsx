@@ -97,7 +97,7 @@ export function Header() {
             <Button variant="ghost" size="sm" className="flex items-center gap-2 px-3">
               <User className="h-4 w-4" />
               <span className="text-sm font-medium">{admin?.username}</span>
-              <Badge variant="secondary" className="text-xs">Admin</Badge>
+              {/* <Badge variant="secondary" className="text-xs">Admin</Badge> */}
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-56">
