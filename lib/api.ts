@@ -2,7 +2,98 @@ import { Property, Trip, Truck, Furniture, PropertyStats } from '../types'
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
+// Token management for API calls
+const getAuthHeaders = (): HeadersInit => {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json"
+  }
+  
+  // Only add auth header in browser environment
+  if (typeof window !== 'undefined') {
+    const token = sessionStorage.getItem('arambo_admin_token')
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+  }
+  
+  return headers
+}
+
+// Enhanced fetch function with auth handling
+const authenticatedFetch = async (url: string, options: RequestInit = {}) => {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      ...getAuthHeaders(),
+      ...options.headers,
+    },
+  })
+
+  // Handle authentication errors globally
+  if (response.status === 401) {
+    // Token expired or invalid
+    if (typeof window !== 'undefined') {
+      sessionStorage.removeItem('arambo_admin_token')
+      sessionStorage.removeItem('arambo_token_expiry')
+      
+      // Redirect to login page
+      window.location.href = '/login'
+    }
+    throw new Error('Authentication required')
+  }
+
+  return response
+}
+
+// Determine if an operation requires authentication
+const requiresAuth = (method: string): boolean => {
+  return ['PUT', 'DELETE'].includes(method.toUpperCase())
+}
+
 export const api = {
+  // Authentication API
+  auth: {
+    login: async (username: string, password: string) => {
+      const response = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      })
+      return response.json()
+    },
+    verify: async (token: string) => {
+      const response = await fetch(`${API_BASE_URL}/auth/verify`, {
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json" 
+        },
+      })
+      return response.json()
+    },
+    status: async (token?: string) => {
+      const headers: HeadersInit = { "Content-Type": "application/json" }
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`
+      }
+      const response = await fetch(`${API_BASE_URL}/auth/status`, { headers })
+      return response.json()
+    },
+    logout: async (token: string) => {
+      const response = await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: "POST",
+        headers: { 
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json" 
+        },
+      })
+      return response.json()
+    },
+    health: async () => {
+      const response = await fetch(`${API_BASE_URL}/auth/health`)
+      return response.json()
+    }
+  },
+
   // Properties API
   properties: {
     getAll: async (params?: Record<string, string | number | boolean>) => {
@@ -35,9 +126,8 @@ export const api = {
       return response.json()
     },
     update: async (id: string, data: Partial<Property>) => {
-      const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
+      const response = await authenticatedFetch(`${API_BASE_URL}/properties/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
       
@@ -45,7 +135,7 @@ export const api = {
       return response.json()
     },
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/properties/${id}`, {
+      const response = await authenticatedFetch(`${API_BASE_URL}/properties/${id}`, {
         method: "DELETE",
       })
       if (!response.ok) throw new Error("Failed to delete property")
@@ -80,9 +170,8 @@ export const api = {
       return response.json()
     },
     update: async (id: string, data: Partial<Trip>) => {
-      const response = await fetch(`${API_BASE_URL}/trips/${id}`, {
+      const response = await authenticatedFetch(`${API_BASE_URL}/trips/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
       if (!response.ok) {
@@ -92,7 +181,7 @@ export const api = {
       return response.json()
     },
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/trips/${id}`, {
+      const response = await authenticatedFetch(`${API_BASE_URL}/trips/${id}`, {
         method: "DELETE",
       })
       if (!response.ok) throw new Error("Failed to delete trip")
@@ -122,16 +211,15 @@ export const api = {
       return response.json()
     },
     update: async (id: string, data: Partial<Truck>) => {
-      const response = await fetch(`${API_BASE_URL}/trucks/${id}`, {
+      const response = await authenticatedFetch(`${API_BASE_URL}/trucks/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
       if (!response.ok) throw new Error("Failed to update truck")
       return response.json()
     },
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/trucks/${id}`, {
+      const response = await authenticatedFetch(`${API_BASE_URL}/trucks/${id}`, {
         method: "DELETE",
       })
       if (!response.ok) throw new Error("Failed to delete truck")
@@ -157,7 +245,7 @@ export const api = {
       // Backend returns {data: [...]} format, we need just the array
       const furnitureList = result.data || result
       // Convert _id to id for consistency
-      return furnitureList.map((item: any) => ({
+      return furnitureList.map((item: Record<string, unknown>) => ({
         ...item,
         id: item._id || item.id
       }))
@@ -187,9 +275,8 @@ export const api = {
       return result
     },
     update: async (id: string, data: Partial<Furniture>) => {
-      const response = await fetch(`${API_BASE_URL}/furniture/${id}`, {
+      const response = await authenticatedFetch(`${API_BASE_URL}/furniture/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),
       })
       if (!response.ok) throw new Error("Failed to update furniture request")
@@ -201,7 +288,7 @@ export const api = {
       return result
     },
     delete: async (id: string) => {
-      const response = await fetch(`${API_BASE_URL}/furniture/${id}`, {
+      const response = await authenticatedFetch(`${API_BASE_URL}/furniture/${id}`, {
         method: "DELETE",
       })
       if (!response.ok) throw new Error("Failed to delete furniture request")
