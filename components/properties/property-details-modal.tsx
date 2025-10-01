@@ -83,12 +83,10 @@ export function PropertyDetailsModal({ property, open, onOpenChange }: PropertyD
           <div className="space-y-6 pr-4">
             {/* Status Badges */}
             <div className="flex gap-2 flex-wrap">
-              <Badge variant="outline">{property.category}</Badge>
+              <Badge variant="outline">{property.furnishingStatus}</Badge>
               {property.propertyType && <Badge variant="outline">{property.propertyType}</Badge>}
               {property.propertyCategory && <Badge variant="outline">{property.propertyCategory}</Badge>}
-              {property.furnishingStatus && property.furnishingStatus !== property.category && (
-                <Badge variant="outline">{property.furnishingStatus}</Badge>
-              )}
+              {/* Removed duplicate furnishing status badge */}
               {property.tenantType && <Badge variant="secondary">{property.tenantType}</Badge>}
               {property.apartmentType && <Badge variant="outline">{property.apartmentType}</Badge>}
               {property.inventoryStatus && (
@@ -246,13 +244,8 @@ export function PropertyDetailsModal({ property, open, onOpenChange }: PropertyD
                   </div>
                 )}
                 <div>
-                  <span className="text-muted-foreground">Furnishing:</span> {property.category}
+                  <span className="text-muted-foreground">Furnishing:</span> {property.furnishingStatus}
                 </div>
-                {property.furnishingStatus && property.furnishingStatus !== property.category && (
-                  <div>
-                    <span className="text-muted-foreground">Furnishing Status:</span> {property.furnishingStatus}
-                  </div>
-                )}
                 {property.inventoryStatus && (
                   <div>
                     <span className="text-muted-foreground">Inventory Status:</span>{" "}

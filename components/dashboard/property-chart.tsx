@@ -46,8 +46,8 @@ export function PropertyChart({ data }: PropertyChartProps) {
   return (
     <Card className="bg-card border-border">
       <CardHeader>
-        <CardTitle className="text-foreground">Properties by Category</CardTitle>
-        <CardDescription className="text-muted-foreground">Distribution of property types</CardDescription>
+        <CardTitle className="text-foreground">Properties by Furnishing Status</CardTitle>
+        <CardDescription className="text-muted-foreground">Distribution of property furnishing types</CardDescription>
       </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={300}>
