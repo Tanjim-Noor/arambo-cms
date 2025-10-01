@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ExportData } from "@/components/ui/export-data"
+// import { ExportData } from "@/components/ui/export-data"
 
 export default function TrucksPage() {
   const [trucks, setTrucks] = useState<Truck[]>([])
@@ -156,7 +156,7 @@ export default function TrucksPage() {
           <p className="text-muted-foreground">Manage your fleet of delivery trucks</p>
         </div>
         <div className="flex gap-2">
-          <ExportData data={filteredTrucks} filename="trucks-export" module="trucks" />
+          {/* <ExportData data={filteredTrucks} filename="trucks-export" module="trucks" /> */}
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Add Truck

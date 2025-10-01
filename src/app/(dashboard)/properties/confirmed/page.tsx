@@ -7,7 +7,8 @@ import { DataTable } from "@/components/properties/data-table"
 import { createColumns } from "@/components/properties/columns"
 import { PropertyDetailsModal } from "@/components/properties/property-details-modal"
 import { Button } from "@/components/ui/button"
-import { Plus, Download } from "lucide-react"
+// import { Plus, Download } from "lucide-react"
+import { Plus } from "lucide-react"
 import Link from "next/link"
 import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -104,10 +105,10 @@ export default function ConfirmedPropertiesPage() {
           <p className="text-muted-foreground">Manage verified and confirmed properties</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline">
+          {/* <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
             Export
-          </Button>
+          </Button> */}
           <Link href="/properties/new">
             <Button>
               <Plus className="mr-2 h-4 w-4" />

@@ -14,7 +14,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { ExportData } from "@/components/ui/export-data"
+// import { ExportData } from "@/components/ui/export-data"
 
 export default function FurniturePage() {
   const [furniture, setFurniture] = useState<Furniture[]>([])
@@ -147,7 +147,7 @@ export default function FurniturePage() {
           <p className="text-muted-foreground">Manage customer furniture requests and orders</p>
         </div>
         <div className="flex gap-2">
-          <ExportData data={filteredFurniture} filename="furniture-export" module="furniture" />
+          {/* <ExportData data={filteredFurniture} filename="furniture-export" module="furniture" /> */}
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             New Request

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import type { Trip } from "@/types"
+import type { Trip, Truck } from "@/types"
 import { api } from "@/lib/api"
 import { DataTable } from "@/components/properties/data-table"
 import { createTripColumns } from "@/components/trips/trip-columns"
@@ -13,10 +13,11 @@ import { useToast } from "@/hooks/use-toast"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ExportData } from "@/components/ui/export-data"
+// import { ExportData } from "@/components/ui/export-data"
 
 export default function TripsPage() {
   const [trips, setTrips] = useState<Trip[]>([])
+  const [trucks, setTrucks] = useState<Truck[]>([])
   const [loading, setLoading] = useState(true)
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null)
   const [detailsOpen, setDetailsOpen] = useState(false)
@@ -30,16 +31,21 @@ export default function TripsPage() {
   const fetchTrips = async () => {
     try {
       setLoading(true)
-      const response = await api.trips.getAll()
-      setTrips(response || [])
+      const [tripsResponse, trucksResponse] = await Promise.all([
+        api.trips.getAll(),
+        api.trucks.getAll()
+      ])
+      setTrips(tripsResponse || [])
+      setTrucks(trucksResponse || [])
     } catch (error) {
-      console.error("Error fetching trips:", error)
+      console.error("Error fetching data:", error)
       toast({
         title: "Error",
-        description: "Failed to fetch trips. Please try again.",
+        description: "Failed to fetch data. Please try again.",
         variant: "destructive",
       })
       setTrips([])
+      setTrucks([])
     } finally {
       setLoading(false)
     }
@@ -82,6 +88,7 @@ export default function TripsPage() {
     onView: handleView,
     onEdit: handleEdit,
     onDelete: handleDelete,
+    trucks: trucks,
   })
 
   // Filter trips based on selected filters
@@ -118,7 +125,7 @@ export default function TripsPage() {
           <p className="text-muted-foreground">Manage and track all delivery trips</p>
         </div>
         <div className="flex gap-2">
-          <ExportData data={filteredTrips} filename="trips-export" module="trips" />
+          {/* <ExportData data={filteredTrips} filename="trips-export" module="trips" /> */}
           <Button onClick={() => setCreateOpen(true)}>
             <Plus className="mr-2 h-4 w-4" />
             Create Trip

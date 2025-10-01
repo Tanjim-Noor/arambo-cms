@@ -19,9 +19,9 @@ export default function DashboardPage() {
     totalFurniture: 0,
   })
   const [chartData, setChartData] = useState([
-    { name: "Furnished", value: 45, color: "hsl(var(--chart-1))" },
-    { name: "Semi-Furnished", value: 35, color: "hsl(var(--chart-2))" },
-    { name: "Non-Furnished", value: 20, color: "hsl(var(--chart-3))" },
+    { name: "Furnished", value: 45, color: "#8884d8" },
+    { name: "Semi-Furnished", value: 35, color: "#82ca9d" },
+    { name: "Non-Furnished", value: 20, color: "#ffc658" },
   ])
   const [activities] = useState([
     {
@@ -99,9 +99,9 @@ export default function DashboardPage() {
           }, {})
 
           const newChartData = [
-            { name: "Furnished", value: categoryCount.Furnished || 0, color: "hsl(var(--chart-1))" },
-            { name: "Semi-Furnished", value: categoryCount["Semi-Furnished"] || 0, color: "hsl(var(--chart-2))" },
-            { name: "Non-Furnished", value: categoryCount["Non-Furnished"] || 0, color: "hsl(var(--chart-3))" },
+            { name: "Furnished", value: categoryCount.Furnished || 0, color: "#8884d8" },
+            { name: "Semi-Furnished", value: categoryCount["Semi-Furnished"] || 0, color: "#82ca9d" },
+            { name: "Non-Furnished", value: categoryCount["Non-Furnished"] || 0, color: "#ffc658" },
           ]
           setChartData(newChartData)
         }

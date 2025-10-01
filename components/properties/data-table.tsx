@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { ChevronDown, Search, Filter } from "lucide-react"
-import { AdvancedFilters } from "@/components/ui/advanced-filters"
+// import { AdvancedFilters } from "@/components/ui/advanced-filters"
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -44,7 +44,7 @@ export function DataTable<TData, TValue>({
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState("")
-  const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({})
+  // const [advancedFilters, setAdvancedFilters] = useState<Record<string, any>>({})
 
   const table = useReactTable({
     data,
@@ -82,7 +82,7 @@ export function DataTable<TData, TValue>({
               className="pl-8 max-w-sm"
             />
           </div>
-          <AdvancedFilters module="properties" onFiltersChange={setAdvancedFilters} activeFilters={advancedFilters} />
+          {/* <AdvancedFilters module="properties" onFiltersChange={setAdvancedFilters} activeFilters={advancedFilters} /> */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="ml-auto bg-transparent">
