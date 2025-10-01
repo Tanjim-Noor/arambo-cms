@@ -1,7 +1,7 @@
 "use client"
 
 import type { ColumnDef } from "@tanstack/react-table"
-import type { Trip } from "@/types"
+import type { Trip, Truck } from "@/types"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
@@ -12,9 +12,10 @@ interface TripColumnsProps {
   onView?: (trip: Trip) => void
   onEdit?: (trip: Trip) => void
   onDelete?: (trip: Trip) => void
+  trucks?: Truck[]
 }
 
-export const createTripColumns = ({ onView, onEdit, onDelete }: TripColumnsProps): ColumnDef<Trip>[] => [
+export const createTripColumns = ({ onView, onEdit, onDelete, trucks = [] }: TripColumnsProps): ColumnDef<Trip>[] => [
   {
     accessorKey: "name",
     header: ({ column }) => {
@@ -108,7 +109,20 @@ export const createTripColumns = ({ onView, onEdit, onDelete }: TripColumnsProps
       if (!truckId) {
         return <span className="text-sm text-muted-foreground">No truck assigned</span>
       }
-      return <span className="text-sm font-mono">{truckId.slice(-8)}</span>
+      
+      // Find the truck by ID
+      const truck = trucks.find(t => t.id === truckId)
+      
+      return (
+        <div>
+          <div className="font-medium text-sm">
+            {truck ? truck.modelNumber : 'Unknown Truck'}
+          </div>
+          <div className="text-xs text-muted-foreground font-mono">
+            {truckId.slice(-8)}
+          </div>
+        </div>
+      )
     },
   },
   {
