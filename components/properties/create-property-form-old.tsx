@@ -16,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Separator } from "@/components/ui/separator"
 import { api } from "@/lib/api"
 import { useToast } from "@/hooks/use-toast"
+import { ListingType, PropertyType, InventoryStatus, TenantType, PropertyCategory, FurnishingStatus, Area } from "@/types"
 
 const propertySchema = z.object({
   // Required fields
@@ -33,21 +34,21 @@ const propertySchema = z.object({
   location: z.string().min(1, "Location is required").max(300, "Location must be less than 300 characters"),
   bedrooms: z.number().min(0, "Bedrooms cannot be negative").max(50, "Too many bedrooms"),
   bathroom: z.number().min(0, "Bathrooms cannot be negative").max(50, "Too many bathrooms"),
-  category: z.enum(["Furnished", "Semi-Furnished", "Non-Furnished"]),
+  furnishingStatus: z.enum(["Furnished", "Semi-Furnished", "Non-Furnished"]),
 
-  // Property details (optional)
-  listingType: z.string().optional(),
+  // Property details (required)
+  listingType: z.enum(["For Rent", "For Sale", "Both"]),
   propertyType: z.enum(["Apartment", "House", "Villa"]).optional(),
   baranda: z.number().min(0, "Baranda cannot be negative").optional(),
   notes: z.string().max(1000, "Notes must be less than 1000 characters").optional(),
 
   // Status fields
-  firstOwner: z.boolean().default(false),
-  lift: z.boolean().default(false),
-  isConfirmed: z.boolean().default(false),
-  paperworkUpdated: z.boolean().default(false),
-  onLoan: z.boolean().default(false),
-  isVerified: z.boolean().default(false),
+  firstOwner: z.boolean().optional(),
+  lift: z.boolean().optional(),
+  isConfirmed: z.boolean().optional(),
+  paperworkUpdated: z.boolean().optional(),
+  onLoan: z.boolean().optional(),
+  isVerified: z.boolean().optional(),
 
   // Location details
   houseId: z.string().max(50, "House ID must be less than 50 characters").optional(),
@@ -113,7 +114,7 @@ const propertySchema = z.object({
   inventoryStatus: z.enum(["Looking for Rent", "Found Tenant", "Owner Unreachable"]).optional(),
   tenantType: z.enum(["Family", "Bachelor", "Women"]).optional(),
   propertyCategory: z.enum(["Residential", "Commercial"]).optional(),
-  furnishingStatus: z.enum(["Non-Furnished", "Semi-Furnished", "Furnished"]).optional(),
+
 
   // Property specifications
   availableFrom: z.string().optional(),
@@ -176,7 +177,7 @@ export function CreatePropertyForm({ open, onOpenChange, onSuccess, property }: 
   const { toast } = useToast()
   const isEdit = !!property
 
-  const form = useForm<PropertyFormData>({
+  const form = useForm({
     resolver: zodResolver(propertySchema),
     defaultValues: {
       name: property?.name || "",
@@ -187,7 +188,7 @@ export function CreatePropertyForm({ open, onOpenChange, onSuccess, property }: 
       location: property?.location || "",
       bedrooms: property?.bedrooms || 2,
       bathroom: property?.bathroom || 1,
-      category: property?.category || "Non-Furnished",
+      furnishingStatus: property?.furnishingStatus || "Non-Furnished",
       listingType: property?.listingType || "",
       propertyType: property?.propertyType,
       baranda: property?.baranda || 0,
@@ -206,7 +207,6 @@ export function CreatePropertyForm({ open, onOpenChange, onSuccess, property }: 
       inventoryStatus: property?.inventoryStatus,
       tenantType: property?.tenantType,
       propertyCategory: property?.propertyCategory,
-      furnishingStatus: property?.furnishingStatus,
       availableFrom: property?.availableFrom || "",
       floor: property?.floor,
       totalFloor: property?.totalFloor,
@@ -230,7 +230,7 @@ export function CreatePropertyForm({ open, onOpenChange, onSuccess, property }: 
     },
   })
 
-  const onSubmit = async (data: PropertyFormData) => {
+  const onSubmit = async (data: any) => {
     try {
       setLoading(true)
       if (isEdit) {
@@ -343,11 +343,11 @@ export function CreatePropertyForm({ open, onOpenChange, onSuccess, property }: 
 
                     <FormField
                       control={form.control}
-                      name="category"
+                      name="furnishingStatus"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Furnishing Category *</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} defaultValue={field.value as string}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Select category" />

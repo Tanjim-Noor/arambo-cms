@@ -19,9 +19,9 @@ export default function DashboardPage() {
     totalFurniture: 0,
   })
   const [chartData, setChartData] = useState([
-    { name: "Furnished", value: 45, color: "#8884d8" },
-    { name: "Semi-Furnished", value: 35, color: "#82ca9d" },
-    { name: "Non-Furnished", value: 20, color: "#ffc658" },
+    { name: "Furnished", value: 0, color: "#8884d8" },
+    { name: "Semi-Furnished", value: 0, color: "#82ca9d" },
+    { name: "Non-Furnished", value: 0, color: "#ffc658" },
   ])
   const [activities] = useState([
     {
@@ -92,17 +92,30 @@ export default function DashboardPage() {
             unconfirmedProperties: unconfirmed,
           }))
 
-          // Update chart data based on actual property categories
-          const categoryCount = properties.reduce((acc: any, property: any) => {
-            acc[property.category] = (acc[property.category] || 0) + 1
+          // Update chart data based on actual property furnishing status
+          const furnishingCount = properties.reduce((acc: any, property: any) => {
+            const furnishing = property.furnishingStatus || property.category || "Unknown"
+            acc[furnishing] = (acc[furnishing] || 0) + 1
             return acc
           }, {})
 
-          const newChartData = [
-            { name: "Furnished", value: categoryCount.Furnished || 0, color: "#8884d8" },
-            { name: "Semi-Furnished", value: categoryCount["Semi-Furnished"] || 0, color: "#82ca9d" },
-            { name: "Non-Furnished", value: categoryCount["Non-Furnished"] || 0, color: "#ffc658" },
-          ]
+          // Define colors for different furnishing statuses
+          const furnishingColors: { [key: string]: string } = {
+            "Furnished": "#8884d8",
+            "Semi-Furnished": "#82ca9d", 
+            "Non-Furnished": "#ffc658",
+            "Unknown": "#ff7c7c"
+          }
+
+          // Create chart data dynamically from database results
+          const newChartData = Object.entries(furnishingCount)
+            .filter(([_, count]) => (count as number) > 0) // Only include categories with data
+            .map(([status, count], index) => ({
+              name: status,
+              value: count as number,
+              color: furnishingColors[status] || `hsl(${index * 60}, 70%, 60%)`
+            }))
+
           setChartData(newChartData)
         }
 
@@ -120,7 +133,7 @@ export default function DashboardPage() {
 
         // Process furniture data
         if (furnitureResponse.status === "fulfilled") {
-          const furniture = furnitureResponse.value.data || []
+          const furniture = furnitureResponse.value || []
           setStats((prev) => ({ ...prev, totalFurniture: furniture.length }))
         }
       } catch (error) {
@@ -134,6 +147,13 @@ export default function DashboardPage() {
           totalTrucks: 12,
           totalFurniture: 45,
         })
+        
+        // Set fallback chart data
+        setChartData([
+          { name: "Furnished", value: 45, color: "#8884d8" },
+          { name: "Semi-Furnished", value: 35, color: "#82ca9d" },
+          { name: "Non-Furnished", value: 20, color: "#ffc658" },
+        ])
       } finally {
         setLoading(false)
       }
