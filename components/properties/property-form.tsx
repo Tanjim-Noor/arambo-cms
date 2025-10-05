@@ -221,7 +221,7 @@ export function PropertyForm({
           </div>
         );
 
-      // Number inputs
+      // Number inputs - Uncontrolled inputs to prevent value reset
       case "size":
       case "bedrooms":
       case "bathroom":
@@ -248,10 +248,42 @@ export function PropertyForm({
                 <FormControl>
                   <Input
                     placeholder={getFieldPlaceholder(fieldName)}
-                    type="number"
-                    {...field}
-                    value={field.value?.toString() || ""}
-                    onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+                    type="text"
+                    defaultValue={field.value !== undefined ? field.value.toString() : ""}
+                    onChange={(e) => {
+                      const value = e.target.value.trim();
+                      
+                      if (value === "") {
+                        // Allow clearing the field
+                        field.onChange(undefined);
+                      } else {
+                        // Parse and validate the number
+                        const numValue = Number(value);
+                        if (!isNaN(numValue) && value.match(/^-?\d*\.?\d*$/)) {
+                          field.onChange(numValue);
+                        }
+                      }
+                    }}
+                    onBlur={(e) => {
+                      // Final validation on blur
+                      const value = e.target.value.trim();
+                      if (value === "") {
+                        field.onChange(undefined);
+                      } else {
+                        const numValue = Number(value);
+                        if (!isNaN(numValue)) {
+                          field.onChange(numValue);
+                        }
+                      }
+                      field.onBlur();
+                    }}
+                    onFocus={(e) => {
+                      // Ensure the input shows the current value when focused
+                      const currentValue = field.value;
+                      if (currentValue !== undefined) {
+                        e.target.value = currentValue.toString();
+                      }
+                    }}
                   />
                 </FormControl>
                 <FormMessage />
